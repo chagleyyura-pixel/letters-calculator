@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Заявки — Калькулятор вывески</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14171c; --bg-panel:#1b1f26; --surface:#20242c; --line:#2b313b;
+    --text:#f3f1ea; --text-soft:#a9afbb; --text-faint:#6b7280;
+    --accent:#ffb020; --accent-deep:#e0930a; --steel:#3e4654;
+    --success:#4cc38a; --warn:#ffb020; --danger:#ff6b6b;
+    --display:'Bebas Neue',sans-serif; --mono:'IBM Plex Mono',monospace; --body:'Inter',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{ font-family:var(--body); background:var(--bg); color:var(--text); padding:28px 16px; }
+  .wrap{ max-width:1100px; margin:0 auto; }
+  h1{ font-family:var(--display); font-weight:400; font-size:32px; margin:0 0 4px; }
+  .sub{ color:var(--text-soft); font-size:13px; margin:0 0 20px; }
+
+  .gate{ max-width:340px; margin:80px auto; background:var(--bg-panel); border:1px solid var(--line); border-radius:16px; padding:28px; text-align:center; }
+  .gate input{ width:100%; background:var(--surface); border:1px solid var(--line); color:var(--text); border-radius:8px; padding:11px 12px; font-size:14px; margin:14px 0; }
+  .gate button{ width:100%; background:var(--accent); border:none; color:#1a1300; font-weight:700; padding:12px; border-radius:8px; cursor:pointer; font-size:14px; }
+  .gate .err{ color:var(--danger); font-size:12px; min-height:16px; margin-top:6px; }
+
+  .stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:20px; }
+  @media (max-width:700px){ .stats{ grid-template-columns:repeat(2,1fr); } }
+  .stat{ background:var(--bg-panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+  .stat .n{ font-family:var(--mono); font-size:24px; color:var(--accent); font-weight:600; }
+  .stat .l{ font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.06em; margin-top:2px; }
+
+  .toolbar{ display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; align-items:center; }
+  .toolbar select, .toolbar input{ background:var(--surface); border:1px solid var(--line); color:var(--text); border-radius:8px; padding:8px 12px; font-size:13px; font-family:var(--body); }
+  .toolbar .spacer{ flex:1; }
+  .refresh-btn{ background:transparent; border:1px solid var(--line); color:var(--text-soft); border-radius:8px; padding:8px 14px; cursor:pointer; font-size:13px; }
+  .refresh-btn:hover{ border-color:var(--steel); color:var(--text); }
+
+  table{ width:100%; border-collapse:collapse; background:var(--bg-panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  th, td{ padding:10px 12px; text-align:left; font-size:12.5px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th{ background:var(--surface); font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-soft); }
+  tr:last-child td{ border-bottom:none; }
+  .params{ color:var(--text-faint); font-size:11.5px; line-height:1.5; max-width:280px; }
+  .price{ font-family:var(--mono); color:var(--accent); font-weight:600; white-space:nowrap; }
+  .contact a{ color:var(--text); text-decoration:none; }
+  .contact a:hover{ color:var(--accent); }
+  .date{ color:var(--text-faint); font-family:var(--mono); font-size:11px; white-space:nowrap; }
+
+  select.status{ background:var(--surface); border:1px solid var(--line); color:var(--text); border-radius:6px; padding:5px 8px; font-size:12px; font-family:var(--body); }
+  select.status[data-status="new"]{ border-color:var(--accent); color:var(--accent); }
+  select.status[data-status="in_progress"]{ border-color:#7fd9ff; color:#7fd9ff; }
+  select.status[data-status="closed"]{ border-color:var(--success); color:var(--success); }
+
+  .empty{ text-align:center; padding:60px 20px; color:var(--text-faint); }
+</style>
+</head>
+<body>
+
+<div id="gateScreen" class="gate">
+  <h1 style="font-size:24px;">Вход</h1>
+  <p class="sub">Заявки с калькулятора вывески</p>
+  <input type="password" id="pwInput" placeholder="Пароль">
+  <button id="pwSubmit">Войти</button>
+  <div class="err" id="pwError"></div>
+</div>
+
+<div id="app" class="wrap" style="display:none;">
+  <h1>Заявки</h1>
+  <p class="sub">Все заявки с калькулятора вывески, в реальном времени из Netlify Blobs.</p>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="toolbar">
+    <select id="statusFilter">
+      <option value="all">Все статусы</option>
+      <option value="new">Новые</option>
+      <option value="in_progress">В работе</option>
+      <option value="closed">Закрытые</option>
+    </select>
+    <input type="text" id="searchInput" placeholder="Поиск по имени/телефону">
+    <div class="spacer"></div>
+    <button class="refresh-btn" id="refreshBtn">Обновить</button>
+  </div>
+
+  <table id="leadsTable">
+    <thead>
+      <tr>
+        <th>Дата</th>
+        <th>Контакт</th>
+        <th>Вывеска</th>
+        <th>Параметры</th>
+        <th>Цена</th>
+        <th>Статус</th>
+      </tr>
+    </thead>
+    <tbody id="leadsBody"></tbody>
+  </table>
+  <div class="empty" id="emptyState" style="display:none;">Заявок пока нет</div>
+</div>
+
+<script>
+const API_BASE = ""; // тот же домен, где живёт сайт
+let PASSWORD = "";
+let allLeads = [];
+
+const $ = (id) => document.getElementById(id);
+
+$("pwSubmit").addEventListener("click", tryLogin);
+$("pwInput").addEventListener("keydown", (e)=>{ if(e.key === "Enter") tryLogin(); });
+
+async function tryLogin(){
+  const pw = $("pwInput").value;
+  $("pwError").textContent = "";
+  try{
+    const res = await fetch(API_BASE + "/.netlify/functions/get-leads", {
+      headers: { "x-admin-password": pw }
+    });
+    if(res.status === 401){
+      $("pwError").textContent = "Неверный пароль";
+      return;
+    }
+    if(!res.ok){
+      $("pwError").textContent = "Ошибка сервера, попробуйте позже";
+      return;
+    }
+    PASSWORD = pw;
+    allLeads = await res.json();
+    $("gateScreen").style.display = "none";
+    $("app").style.display = "block";
+    render();
+  } catch(err){
+    $("pwError").textContent = "Не удалось подключиться к серверу";
+    console.error(err);
+  }
+}
+
+async function refreshLeads(){
+  try{
+    const res = await fetch(API_BASE + "/.netlify/functions/get-leads", {
+      headers: { "x-admin-password": PASSWORD }
+    });
+    if(res.ok){
+      allLeads = await res.json();
+      render();
+    }
+  } catch(err){ console.error(err); }
+}
+$("refreshBtn").addEventListener("click", refreshLeads);
+$("statusFilter").addEventListener("change", render);
+$("searchInput").addEventListener("input", render);
+
+const STATUS_LABELS = { new: "Новая", in_progress: "В работе", closed: "Закрыта" };
+
+function formatDate(iso){
+  const d = new Date(iso);
+  return d.toLocaleDateString("ru-RU") + " " + d.toLocaleTimeString("ru-RU", {hour:"2-digit", minute:"2-digit"});
+}
+
+function render(){
+  const statusVal = $("statusFilter").value;
+  const search = $("searchInput").value.trim().toLowerCase();
+
+  let leads = allLeads.filter(l=>{
+    if(statusVal !== "all" && l.status !== statusVal) return false;
+    if(search){
+      const hay = (l.name + " " + l.phone + " " + l.email).toLowerCase();
+      if(!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  // Stats (over all leads, not filtered)
+  const today = new Date(); today.setHours(0,0,0,0);
+  const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate()-7);
+  const todayCount = allLeads.filter(l=> new Date(l.createdAt) >= today).length;
+  const weekCount = allLeads.filter(l=> new Date(l.createdAt) >= weekAgo).length;
+  const prices = allLeads.map(l=> parseInt(String(l.price).replace(/[^\d]/g,""),10)).filter(n=>!isNaN(n));
+  const avgPrice = prices.length ? Math.round(prices.reduce((a,b)=>a+b,0)/prices.length).toLocaleString("ru-RU") : "—";
+
+  $("stats").innerHTML = `
+    <div class="stat"><div class="n">${allLeads.length}</div><div class="l">Всего заявок</div></div>
+    <div class="stat"><div class="n">${todayCount}</div><div class="l">Сегодня</div></div>
+    <div class="stat"><div class="n">${weekCount}</div><div class="l">За 7 дней</div></div>
+    <div class="stat"><div class="n">${avgPrice} ₽</div><div class="l">Средний чек</div></div>
+  `;
+
+  if(leads.length === 0){
+    $("leadsBody").innerHTML = "";
+    $("emptyState").style.display = "block";
+    $("leadsTable").style.display = "none";
+    return;
+  }
+  $("emptyState").style.display = "none";
+  $("leadsTable").style.display = "table";
+
+  $("leadsBody").innerHTML = leads.map(l=>`
+    <tr>
+      <td class="date">${formatDate(l.createdAt)}</td>
+      <td class="contact">
+        <div><strong>${escapeHtml(l.name)}</strong></div>
+        <div><a href="tel:${escapeHtml(l.phone)}">${escapeHtml(l.phone)}</a></div>
+        ${l.email ? `<div><a href="mailto:${escapeHtml(l.email)}">${escapeHtml(l.email)}</a></div>` : ""}
+      </td>
+      <td>${escapeHtml(l.signText || "—")}</td>
+      <td class="params">
+        ${escapeHtml(l.type || "")}${l.height ? ", " + escapeHtml(l.height) : ""}<br>
+        ${escapeHtml(l.font || "")}, ${escapeHtml(l.place || "")}, ${escapeHtml(l.cls || "")}<br>
+        ${escapeHtml(l.backing || "")}, ${escapeHtml(l.mount || "")}
+      </td>
+      <td class="price">${escapeHtml(l.price || "—")}</td>
+      <td>
+        <select class="status" data-status="${l.status}" data-id="${l.id}">
+          <option value="new" ${l.status==="new"?"selected":""}>Новая</option>
+          <option value="in_progress" ${l.status==="in_progress"?"selected":""}>В работе</option>
+          <option value="closed" ${l.status==="closed"?"selected":""}>Закрыта</option>
+        </select>
+      </td>
+    </tr>
+  `).join("");
+
+  document.querySelectorAll("select.status").forEach(sel=>{
+    sel.addEventListener("change", async (e)=>{
+      const id = e.target.dataset.id;
+      const status = e.target.value;
+      e.target.dataset.status = status;
+      try{
+        await fetch(API_BASE + "/.netlify/functions/update-lead-status", {
+          method: "POST",
+          headers: { "Content-Type":"application/json", "x-admin-password": PASSWORD },
+          body: JSON.stringify({ id, status })
+        });
+        const lead = allLeads.find(l=>l.id===id);
+        if(lead) lead.status = status;
+      } catch(err){ console.error(err); }
+    });
+  });
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, s=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[s]));
+}
+</script>
+</body>
+</html>
