@@ -109,14 +109,8 @@
   .letters-wrap.backing-composite{ background:linear-gradient(160deg,#3a4fb0,#22306e); padding:20px 34px; border-radius:8px; box-shadow:0 10px 26px rgba(0,0,0,.4); }
   .letters-wrap.backing-transparent{ background:rgba(255,255,255,.14); backdrop-filter:blur(2px); padding:20px 34px; border-radius:8px; }
   .letters-wrap.backing-frame{ background:transparent; padding:8px 10px; }
-  .frame-bar{ display:none; position:absolute; height:3px; z-index:-1; pointer-events:none; }
-  .letters-wrap.backing-frame .frame-bar{ display:block; }
-  .frame-bar::before, .frame-bar::after{ content:""; position:absolute; top:0; width:6px; height:14px; background:var(--edge-color); }
-  .frame-bar{ background:var(--edge-color); opacity:.9; box-shadow:0 0 5px rgba(0,0,0,.5); }
-  .frame-bar::before{ left:0; transform:translateY(-6px); }
-  .frame-bar::after{ right:0; transform:translateY(-6px); }
-  .frame-strut{ display:none; position:absolute; width:2px; background:var(--edge-color); opacity:.85; z-index:-1; pointer-events:none; }
-  .letters-wrap.backing-frame .frame-strut{ display:block; }
+  .frame-rail{ display:none; position:absolute; left:-20px; right:-20px; height:2px; background:var(--edge-color); opacity:.9; z-index:-1; box-shadow:0 0 4px rgba(0,0,0,.5); pointer-events:none; }
+  .letters-wrap.backing-frame .frame-rail{ display:block; }
 
   /* dimension lines (height / width), like a technical scheme */
   .dim-h{ position:absolute; left:-34px; top:0; bottom:0; width:24px; pointer-events:none; }
@@ -343,16 +337,8 @@
             <span class="label" id="dimHeightLabel">Высота ~ 30 см</span>
           </div>
           <div class="glyph-row" id="glyphRow"></div>
-          <div class="frame-bar" id="frameBarTop"></div>
-          <div class="frame-bar" id="frameBarBottom"></div>
-          <span class="frame-strut" id="strut1"></span>
-          <span class="frame-strut" id="strut2"></span>
-          <span class="frame-strut" id="strut3"></span>
-          <span class="frame-strut" id="strut4"></span>
-          <span class="frame-strut" id="strut1b"></span>
-          <span class="frame-strut" id="strut2b"></span>
-          <span class="frame-strut" id="strut3b"></span>
-          <span class="frame-strut" id="strut4b"></span>
+          <div class="frame-rail" id="railUpper"></div>
+          <div class="frame-rail" id="railLower"></div>
           <div class="dim-w" id="dimW">
             <span class="arrow left">◀</span>
             <span class="line"></span>
@@ -500,7 +486,7 @@ const CONFIG = {
   charWidthRatio: 0.70,
   thinElementsSurcharge: 0.25,
   minOrder: 12000,
-  LEADS_WEBHOOK_URL: "/.netlify/functions/submit-lead"
+  LEADS_WEBHOOK_URL: ""
 };
 
 const state = {
@@ -611,49 +597,12 @@ function positionDimensionLines(){
   dimW.style.left = left + "px";
   dimW.style.right = right + "px";
 
-  const barTop = $("frameBarTop");
-  const barBottom = $("frameBarBottom");
-  if(barTop && barBottom){
-    const overhang = 22;
-    const barLeft = left - overhang;
-    const barRight = right - overhang;
-    barTop.style.left = barLeft + "px";
-    barTop.style.right = barRight + "px";
-    const topY = rowRect.top - wrapRect.top + rowRect.height * 0.12;
-    barTop.style.top = topY + "px";
-    barBottom.style.left = barLeft + "px";
-    barBottom.style.right = barRight + "px";
-    const bottomY = rowRect.bottom - wrapRect.top - rowRect.height * 0.12;
-    barBottom.style.top = bottomY + "px";
-
-    const struts = [$("strut1"), $("strut2"), $("strut3"), $("strut4")];
-    const strutsB = [$("strut1b"), $("strut2b"), $("strut3b"), $("strut4b")];
-    const letterGlyphs = Array.from(row.querySelectorAll(".glyph:not(.space)"));
-    if(letterGlyphs.length){
-      const count = Math.min(struts.length, letterGlyphs.length);
-      const step = letterGlyphs.length / count;
-      for(let i = 0; i < struts.length; i++){
-        const strutTop = struts[i];
-        const strutBottom = strutsB[i];
-        if(!strutTop || !strutBottom) continue;
-        if(i >= count){ strutTop.style.display = "none"; strutBottom.style.display = "none"; continue; }
-        strutTop.style.display = "";
-        strutBottom.style.display = "";
-        const glyphIndex = Math.min(letterGlyphs.length - 1, Math.floor(step * i + step / 2));
-        const glyphRect = letterGlyphs[glyphIndex].getBoundingClientRect();
-        const centerX = glyphRect.left + glyphRect.width / 2 - wrapRect.left;
-        const glyphTopY = glyphRect.top - wrapRect.top;
-        const glyphBottomY = glyphRect.bottom - wrapRect.top;
-        // upper stub: from top bar down to the letter's own top edge (stops there, never enters the letter)
-        strutTop.style.left = centerX + "px";
-        strutTop.style.top = topY + "px";
-        strutTop.style.height = Math.max(0, glyphTopY - topY) + "px";
-        // lower stub: from the letter's own bottom edge down to the bottom bar
-        strutBottom.style.left = centerX + "px";
-        strutBottom.style.top = glyphBottomY + "px";
-        strutBottom.style.height = Math.max(0, bottomY - glyphBottomY) + "px";
-      }
-    }
+  const railUpper = $("railUpper");
+  const railLower = $("railLower");
+  if(railUpper && railLower){
+    const rowTopY = rowRect.top - wrapRect.top;
+    railUpper.style.top = (rowTopY + rowRect.height * 0.32) + "px";
+    railLower.style.top = (rowTopY + rowRect.height * 0.72) + "px";
   }
 }
 
