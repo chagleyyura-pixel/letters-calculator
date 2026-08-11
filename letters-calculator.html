@@ -234,6 +234,45 @@
   .error-text{ color:var(--danger); font-size:12px; margin-top:6px; min-height:14px; }
   .success-state{ text-align:center; padding:8px 0; }
   .success-state .mark{ width:46px; height:46px; border-radius:50%; background:rgba(76,195,138,.15); color:var(--success); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:22px; }
+
+  /* ---------- Mobile ---------- */
+  @media (max-width:600px){
+    body{ padding:14px 8px; }
+    .widget{ border-radius:var(--radius); }
+    .head{ padding:20px 18px 16px; gap:12px; }
+    .head h1{ font-size:26px; }
+    .head p{ font-size:13px; }
+    .reset-btn{ padding:8px 14px; font-size:12.5px; }
+
+    .form{ padding:18px 18px 24px; }
+    .side{ padding:18px 18px 24px; }
+    .step{ padding:16px 0; }
+    .step-hint{ margin-left:0; }
+
+    .row{ gap:14px; }
+    .row > *{ min-width:100%; }
+
+    .card-grid{ grid-template-columns:1fr 1fr; gap:8px; }
+    .card-grid.cols-2{ grid-template-columns:1fr; }
+    .opt-card{ padding:11px 12px; }
+
+    .facade{ min-height:190px; padding:34px 26px 38px 34px; }
+    .price-value{ font-size:28px; }
+    .price-block{ padding:14px 16px; }
+
+    .modal{ padding:20px; }
+    .modal-overlay{ padding:12px; }
+
+    /* Prevent iOS Safari auto-zoom on focus (triggers below 16px font-size) */
+    input[type="text"], input[type="tel"], input[type="email"], input[type="number"],
+    select.color-select{ font-size:16px; }
+
+    /* Bigger touch target for the slider thumb */
+    input[type="range"]::-webkit-slider-thumb{ width:20px; height:20px; }
+    input[type="range"]{ height:6px; }
+
+    .mount-indicator{ flex-wrap:wrap; }
+  }
 </style>
 </head>
 <body>
@@ -455,7 +494,7 @@ const CONFIG = {
     { val:"pvc",          label:"ПВХ подложка",       sub:"5 000 ₽/м²",  pricePerM2:5000,  css:"backing-pvc" },
     { val:"composite",    label:"Композитная подложка",sub:"7 500 ₽/м²", pricePerM2:7500,  css:"backing-composite" },
     { val:"transparent",  label:"Прозрачная подложка", sub:"15 000 ₽/м²",pricePerM2:15000, css:"backing-transparent" },
-    { val:"frame",         label:"Рама",               sub:"4 800 ₽/м²",  pricePerM2:4800, css:"backing-frame" },
+    { val:"frame",         label:"Рама",               sub:"1 000 ₽/м²",  pricePerM2:1000, css:"backing-frame" },
   ],
   mounts: [
     { val:"none",     label:"Без монтажа",              sub:"без доплаты",       percent:0,    min:0 },
