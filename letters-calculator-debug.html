@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Калькулятор объёмных букв</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@700&family=Pacifico&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14171c;
+    --bg-panel:#1b1f26;
+    --surface:#20242c;
+    --line:#2b313b;
+    --line-soft:#242932;
+    --text:#f3f1ea;
+    --text-soft:#a9afbb;
+    --text-faint:#6b7280;
+    --accent:#ffb020;
+    --accent-deep:#e0930a;
+    --accent-cool:#7fd9ff;
+    --steel:#3e4654;
+    --success:#4cc38a;
+    --danger:#ff6b6b;
+    --radius-sm:6px;
+    --radius:12px;
+    --radius-lg:20px;
+    --display: 'Bebas Neue', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+    --body: 'Inter', sans-serif;
+    --face-color:#efeee8;
+    --edge-color:#8a8f98;
+    --dim-color:#8b93ff;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0; overflow-x:hidden; max-width:100%;}
+  body{ font-family:var(--body); background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; padding:32px 16px; }
+  .widget{ max-width:1320px; margin:0 auto; background:linear-gradient(180deg,var(--bg-panel),var(--bg) 70%); border:1px solid var(--line); border-radius:var(--radius-lg); overflow:hidden; }
+  .head{ padding:28px 32px 20px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; }
+  .eyebrow{ font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin:0 0 8px; }
+  .head h1{ font-family:var(--display); font-weight:400; font-size:34px; letter-spacing:.01em; margin:0; line-height:1.05; }
+  .head p{ margin:8px 0 0; color:var(--text-soft); font-size:14px; max-width:520px; }
+  .reset-btn{ background:transparent; border:1px solid var(--line); color:var(--text-soft); font-family:var(--body); font-size:13px; padding:9px 16px; border-radius:999px; cursor:pointer; white-space:nowrap; }
+  .reset-btn:hover{ border-color:var(--steel); color:var(--text); }
+
+  .layout{ display:grid; grid-template-columns:1fr 620px; align-items:start; }
+  @media (max-width:860px){ .layout{grid-template-columns:1fr;} }
+
+  .form{ padding:28px 32px 32px; }
+  .step{ padding:20px 0; border-bottom:1px solid var(--line); }
+  .step:last-of-type{ border-bottom:none; }
+  .step-head{ display:flex; gap:10px; align-items:baseline; margin-bottom:12px; }
+  .step-num{ font-family:var(--mono); font-size:12px; color:var(--accent); }
+  .step-title{ font-size:14px; font-weight:600; }
+  .step-hint{ font-size:12px; color:var(--text-faint); margin:6px 0 0 22px; line-height:1.5; }
+
+  input[type="text"], input[type="tel"], input[type="email"], input[type="number"]{
+    width:100%; background:var(--surface); border:1px solid var(--line); color:var(--text);
+    border-radius:var(--radius-sm); padding:11px 12px; font-family:var(--body); font-size:14px; outline:none; transition:border-color .15s ease;
+  }
+  input:focus-visible, select:focus-visible{ border-color:var(--accent); }
+  .row{ display:flex; gap:20px; flex-wrap:wrap; }
+  .row > *{ flex:1; min-width:180px; }
+  .slider-wrap{ display:flex; align-items:center; gap:14px; }
+  input[type="range"]{ flex:1; -webkit-appearance:none; height:4px; border-radius:2px; background:var(--steel); outline:none; }
+  input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--accent); cursor:pointer; border:2px solid #14171c; }
+  .slider-val{ font-family:var(--mono); font-size:14px; color:var(--accent); min-width:64px; text-align:right; }
+
+  .seg{ display:flex; flex-wrap:wrap; gap:8px; }
+  .seg button{ font-family:var(--body); font-size:13px; color:var(--text-soft); background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:8px 14px; cursor:pointer; transition:all .15s ease; }
+  .seg button:hover{ border-color:var(--steel); color:var(--text); }
+  .seg button.active{ background:rgba(255,176,32,.12); border-color:var(--accent); color:var(--accent); }
+
+  .card-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  @media (max-width:640px){ .card-grid{ grid-template-columns:repeat(2,1fr); } }
+  .card-grid.cols-2{ grid-template-columns:repeat(2,1fr); }
+  @media (max-width:640px){ .card-grid.cols-2{ grid-template-columns:1fr; } }
+  .opt-card{ text-align:left; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-sm); padding:12px 13px; cursor:pointer; color:var(--text); font-family:var(--body); transition:all .15s ease; }
+  .opt-card:hover{ border-color:var(--steel); }
+  .opt-card.active{ border-color:var(--accent); background:rgba(255,176,32,.08); }
+  .opt-card .t{ font-size:13.5px; font-weight:600; line-height:1.3; }
+  .opt-card .s{ font-family:var(--mono); font-size:11px; color:var(--text-faint); margin-top:4px; }
+  .opt-card.active .s{ color:var(--accent); }
+
+  select.color-select{ width:100%; background:var(--surface); border:1px solid var(--line); color:var(--text); border-radius:var(--radius-sm); padding:11px 12px; font-family:var(--body); font-size:14px; }
+  .color-note{ font-size:12px; color:var(--text-faint); margin-top:8px; line-height:1.5; }
+
+  .checkline{ display:flex; align-items:flex-start; gap:10px; cursor:pointer; }
+  .checkline input{ margin-top:3px; accent-color:var(--accent); width:16px; height:16px; }
+  .checkline .t{ font-size:13.5px; }
+  .checkline .s{ font-family:var(--mono); font-size:11px; color:var(--accent); }
+
+  .side{ padding:28px 28px 32px; border-left:1px solid var(--line); position:sticky; top:0; }
+  @media (max-width:860px){ .side{ border-left:none; border-top:1px solid var(--line); position:static; } }
+
+  .facade{
+    position:relative; min-height:230px; border-radius:var(--radius); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+    padding:40px 34px 44px 40px;
+    transition:background .4s ease;
+  }
+  .facade[data-place="street"]{ background:radial-gradient(ellipse 120% 90% at 15% 10%, #232a38, #0b0d12 65%); }
+  .facade[data-place="interior"]{ background:radial-gradient(ellipse at 50% 35%, #322c22, #1b1712 85%); }
+
+  .letters-wrap{ position:relative; z-index:0; display:inline-flex; align-items:center; justify-content:center; transition:all .3s ease; max-width:100%; }
+  .letters-wrap.backing-none{ background:transparent; padding:8px 10px; }
+  .letters-wrap.backing-pvc{ background:#2b3f9e; padding:20px 34px; border-radius:8px; box-shadow:0 10px 26px rgba(0,0,0,.4); }
+  .letters-wrap.backing-composite{ background:linear-gradient(160deg,#3a4fb0,#22306e); padding:20px 34px; border-radius:8px; box-shadow:0 10px 26px rgba(0,0,0,.4); }
+  .letters-wrap.backing-transparent{ background:rgba(255,255,255,.14); backdrop-filter:blur(2px); padding:20px 34px; border-radius:8px; }
+  .letters-wrap.backing-frame{ background:transparent; padding:8px 10px; }
+  .frame-rail{ display:none; position:absolute; left:-20px; right:-20px; height:2px; background:var(--edge-color); opacity:.9; z-index:-1; box-shadow:0 0 4px rgba(0,0,0,.5); pointer-events:none; }
+  .letters-wrap.backing-frame .frame-rail{ display:block; }
+
+  /* dimension lines (height / width), like a technical scheme */
+  .dim-h{ position:absolute; left:-34px; top:0; bottom:0; width:24px; pointer-events:none; }
+  .dim-h .line{ position:absolute; left:50%; top:8px; bottom:8px; width:1px; background:var(--dim-color); transform:translateX(-50%); }
+  .dim-h .arrow{ position:absolute; left:50%; transform:translateX(-50%); font-size:8px; color:var(--dim-color); line-height:1; }
+  .dim-h .arrow.top{ top:-1px; }
+  .dim-h .arrow.bottom{ bottom:-1px; }
+  .dim-h .label{
+    position:absolute; left:-16px; top:50%; transform:translateY(-50%) rotate(-90deg); transform-origin:center;
+    white-space:nowrap; font-family:var(--mono); font-size:10.5px; font-weight:600; color:var(--dim-color);
+  }
+
+  .dim-w{ position:absolute; bottom:-30px; height:20px; pointer-events:none; }
+  .dim-w .line{ position:absolute; left:8px; right:8px; top:50%; height:1px; background:var(--dim-color); transform:translateY(-50%); }
+  .dim-w .arrow{ position:absolute; top:50%; transform:translateY(-50%); font-size:8px; color:var(--dim-color); line-height:1; }
+  .dim-w .arrow.left{ left:-1px; }
+  .dim-w .arrow.right{ right:-1px; }
+  .dim-w .label{
+    position:absolute; left:50%; bottom:-17px; transform:translateX(-50%);
+    white-space:nowrap; font-family:var(--mono); font-size:10.5px; font-weight:600; color:var(--dim-color);
+  }
+
+  .dim-plate{ display:none; position:absolute; left:0; right:0; top:-30px; height:20px; pointer-events:none; }
+  .dim-plate.show{ display:block; }
+  .dim-plate .line{ position:absolute; left:8px; right:8px; top:50%; height:1px; background:var(--dim-color); transform:translateY(-50%); }
+  .dim-plate .arrow{ position:absolute; top:50%; transform:translateY(-50%); font-size:8px; color:var(--dim-color); line-height:1; }
+  .dim-plate .arrow.left{ left:-1px; }
+  .dim-plate .arrow.right{ right:-1px; }
+  .dim-plate .label{
+    position:absolute; left:50%; top:-17px; transform:translateX(-50%);
+    white-space:nowrap; font-family:var(--mono); font-size:10.5px; font-weight:600; color:var(--dim-color);
+  }
+
+  .glyph-row{ display:flex; flex-wrap:nowrap; align-items:baseline; justify-content:center; line-height:1; white-space:nowrap; position:relative; z-index:1; }
+  .glyph{ color:var(--face-color); -webkit-text-stroke:1.1px var(--edge-color); position:relative; z-index:2; display:inline-block; animation:glyphIn .32s ease both; transition:color .3s ease, filter .3s ease, text-shadow .3s ease; }
+  .glyph.space{ width:0.45em; }
+  @keyframes glyphIn{ from{ opacity:0; transform:translateY(16px) scale(.85);} to{ opacity:1; transform:translateY(0) scale(1);} }
+  @media (prefers-reduced-motion:reduce){ .glyph{ animation:none !important; } }
+
+  /* letter type -> lighting behaviour */
+  .facade[data-light="off"] .glyph{ filter:drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
+  .facade[data-light="volume"] .glyph{
+    filter:none;
+    text-shadow:1px 1px 0 var(--edge-color),2px 2px 0 var(--edge-color),3px 3px 0 var(--edge-color),4px 4px 0 var(--edge-color),5px 5px 0 var(--edge-color),6px 6px 0 var(--edge-color);
+  }
+  .facade[data-light="front"] .glyph{
+    text-shadow:2px 3px 0 #12151a,4px 6px 0 #12151a,5px 7px 10px rgba(0,0,0,.6);
+    filter:drop-shadow(0 0 10px var(--face-color)) drop-shadow(0 0 30px var(--face-color));
+  }
+  .facade[data-light="front-strong"] .glyph{
+    text-shadow:2px 3px 0 #12151a,4px 6px 0 #12151a,5px 7px 10px rgba(0,0,0,.6);
+    filter:drop-shadow(0 0 12px var(--face-color)) drop-shadow(0 0 36px var(--face-color)) drop-shadow(0 0 5px var(--edge-color));
+  }
+  .facade[data-light="halo"] .glyph{
+    color:var(--face-color);
+    text-shadow:2px 3px 0 #12151a,4px 6px 0 #12151a,5px 7px 10px rgba(0,0,0,.6);
+    filter:drop-shadow(0 0 7px var(--accent-cool)) drop-shadow(0 0 26px var(--accent-cool)) drop-shadow(0 0 4px var(--edge-color));
+  }
+  .facade[data-light="edge"] .glyph{ filter:drop-shadow(0 0 5px var(--edge-color)) drop-shadow(0 0 16px var(--edge-color)); }
+  .facade[data-light="front-halo"] .glyph{ filter:drop-shadow(0 0 8px var(--face-color)) drop-shadow(0 0 26px var(--face-color)) drop-shadow(0 0 10px var(--edge-color)); }
+  .facade[data-light="rgb"] .glyph{ animation:glyphIn .32s ease both, rgbCycle 4s linear infinite; }
+  @keyframes rgbCycle{
+    0%{ filter:hue-rotate(0deg) drop-shadow(0 0 8px var(--face-color)) drop-shadow(0 0 26px var(--face-color)); }
+    100%{ filter:hue-rotate(360deg) drop-shadow(0 0 8px var(--face-color)) drop-shadow(0 0 26px var(--face-color)); }
+  }
+  .facade[data-light="retro"] .glyph{ filter:drop-shadow(0 0 9px #ffb020) drop-shadow(0 0 24px #ff8a1f); animation:glyphIn .32s ease both, flicker 3.2s infinite; }
+  @keyframes flicker{ 0%,19%,21%,23%,54%,56%,100%{ opacity:1; } 20%,22%,55%{ opacity:.82; } }
+  .facade[data-light="daynight"] .glyph{ animation:glyphIn .32s ease both, dayNight 5s ease-in-out infinite; }
+  @keyframes dayNight{
+    0%,40%{ filter:drop-shadow(0 2px 3px rgba(0,0,0,.3)); }
+    55%,90%{ filter:drop-shadow(0 0 8px var(--face-color)) drop-shadow(0 0 28px var(--face-color)); }
+    100%{ filter:drop-shadow(0 2px 3px rgba(0,0,0,.3)); }
+  }
+
+  .mount-indicator{ display:flex; align-items:flex-end; gap:6px; margin-top:12px; padding:10px 12px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-sm); }
+  .mount-indicator .bars{ display:flex; align-items:flex-end; gap:4px; height:40px; }
+  .mount-indicator .bar{ width:8px; border-radius:2px 2px 0 0; background:var(--steel); transition:background .25s ease, box-shadow .25s ease; }
+  .mount-indicator .bar.active{ background:var(--accent); box-shadow:0 0 10px rgba(255,176,32,.6); }
+  .mount-indicator .label{ font-family:var(--mono); font-size:11.5px; color:var(--text-soft); margin-left:4px; }
+
+  .tags{ display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+  .tag{ font-family:var(--mono); font-size:10.5px; color:var(--text-soft); background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:5px 10px; }
+  .tag.muted{ color:var(--text-faint); }
+
+  .price-block{ margin-top:16px; padding:18px 20px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); }
+  .price-label{ font-family:var(--mono); font-size:11px; color:var(--text-soft); text-transform:uppercase; letter-spacing:.08em; }
+  .price-value{ font-family:var(--mono); font-weight:600; font-size:34px; color:var(--accent); margin-top:4px; }
+  .price-note{ font-size:11.5px; color:var(--text-faint); margin-top:8px; line-height:1.5; }
+
+  .cta{ margin-top:14px; width:100%; background:var(--accent); color:#1a1300; border:none; padding:14px 20px; border-radius:var(--radius-sm); font-family:var(--body); font-weight:700; font-size:15px; cursor:pointer; transition:background .15s ease, transform .1s ease; }
+  .cta:hover{ background:var(--accent-deep); }
+  .cta:active{ transform:scale(.99); }
+  .disclaimer{ font-size:11px; color:var(--text-faint); margin-top:10px; line-height:1.5; }
+
+  .accordion{ margin-top:10px; border:1px solid var(--line); border-radius:var(--radius-sm); overflow:hidden; }
+  .accordion + .accordion{ margin-top:8px; }
+  .accordion summary{ list-style:none; cursor:pointer; padding:12px 14px; font-size:13px; font-weight:600; display:flex; justify-content:space-between; align-items:center; background:var(--surface); }
+  .accordion summary::-webkit-details-marker{ display:none; }
+  .accordion summary::after{ content:"+"; color:var(--accent); font-family:var(--mono); }
+  .accordion[open] summary::after{ content:"–"; }
+  .accordion-body{ padding:12px 14px 16px; font-size:12.5px; color:var(--text-soft); }
+
+  .breakdown-row{ display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--line-soft); font-family:var(--mono); font-size:12px; }
+  .breakdown-row:last-child{ border-bottom:none; }
+  .kp-list{ margin:0; padding-left:16px; }
+  .kp-list li{ margin-bottom:6px; }
+  .kp-text{ width:100%; background:var(--surface); border:1px solid var(--line); color:var(--text-soft); border-radius:var(--radius-sm); padding:10px; font-family:var(--body); font-size:12.5px; line-height:1.6; resize:vertical; min-height:110px; }
+  .copy-btn{ margin-top:8px; background:transparent; border:1px solid var(--line); color:var(--text-soft); font-family:var(--body); font-size:12px; padding:7px 12px; border-radius:999px; cursor:pointer; }
+  .copy-btn:hover{ border-color:var(--steel); color:var(--text); }
+
+  .modal-overlay{ position:fixed; inset:0; background:rgba(10,12,15,.7); display:none; align-items:center; justify-content:center; z-index:50; padding:16px; }
+  .modal-overlay.open{ display:flex; }
+  .modal{ background:var(--bg-panel); border:1px solid var(--line); border-radius:var(--radius-lg); width:100%; max-width:380px; padding:26px; }
+  .modal h2{ font-family:var(--display); font-weight:400; font-size:24px; margin:0 0 6px; }
+  .modal p{ font-size:13px; color:var(--text-soft); margin:0 0 18px; line-height:1.5; }
+  .modal label{ display:block; font-size:12px; color:var(--text-soft); margin:14px 0 6px; }
+  .modal-actions{ display:flex; gap:10px; margin-top:20px; }
+  .btn-ghost{ flex:1; background:transparent; border:1px solid var(--line); color:var(--text-soft); border-radius:var(--radius-sm); padding:12px; font-family:var(--body); font-size:14px; cursor:pointer; }
+  .btn-ghost:hover{ border-color:var(--steel); color:var(--text); }
+  .modal .cta{ flex:1.4; margin-top:0; }
+  .error-text{ color:var(--danger); font-size:12px; margin-top:6px; min-height:14px; }
+  .success-state{ text-align:center; padding:8px 0; }
+  .success-state .mark{ width:46px; height:46px; border-radius:50%; background:rgba(76,195,138,.15); color:var(--success); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:22px; }
+
+  /* ---------- Mobile ---------- */
+  @media (max-width:600px){
+    body{ padding:14px 8px; }
+    .widget{ border-radius:var(--radius); }
+    .head{ padding:20px 18px 16px; gap:12px; }
+    .head h1{ font-size:26px; }
+    .head p{ font-size:13px; }
+    .reset-btn{ padding:8px 14px; font-size:12.5px; }
+
+    .form{ padding:18px 18px 24px; }
+    .side{ padding:18px 18px 24px; }
+    .step{ padding:16px 0; }
+    .step-hint{ margin-left:0; }
+
+    .row{ flex-direction:column; gap:14px; }
+    .row > *{ min-width:100%; width:100%; }
+
+    .card-grid{ grid-template-columns:1fr 1fr; gap:8px; }
+    .card-grid.cols-2{ grid-template-columns:1fr; }
+    .opt-card{ padding:11px 12px; }
+
+    .facade{ min-height:190px; padding:34px 26px 38px 34px; }
+    .price-value{ font-size:28px; }
+    .price-block{ padding:14px 16px; }
+
+    .modal{ padding:20px; }
+    .modal-overlay{ padding:12px; }
+
+    /* Prevent iOS Safari auto-zoom on focus (triggers below 16px font-size) */
+    input[type="text"], input[type="tel"], input[type="email"], input[type="number"],
+    select.color-select{ font-size:16px; }
+
+    /* Bigger touch target for the slider thumb */
+    input[type="range"]::-webkit-slider-thumb{ width:20px; height:20px; }
+    input[type="range"]{ height:6px; }
+
+    .mount-indicator{ flex-wrap:wrap; }
+  }
+</style>
+</head>
+<body>
+
+<div class="widget">
+  <div class="head">
+    <div>
+      <p class="eyebrow">Расчёт стоимости · объёмные буквы</p>
+      <h1>Калькулятор вывески</h1>
+      <p>Соберите параметры вывески и получите расчёт стоимости. Точная цена — после уточнения по фото объекта.</p>
+    </div>
+    <button class="reset-btn" id="resetBtn">Сбросить</button>
+  </div>
+
+  <div class="layout">
+    <div class="form">
+
+      <div class="step">
+        <div class="step-head"><span class="step-num">01</span><span class="step-title">Текст вывески</span></div>
+        <input type="text" id="signText" placeholder="Например: КОФЕЙНЯ" maxlength="40" value="А-РИАЛ">
+        <div class="step-hint">Кириллица, латиница, цифры и символы. Лишние пробелы калькулятор нормализует автоматически.</div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="step-num">02</span><span class="step-title">Высота букв, см</span></div>
+        <div class="slider-wrap">
+          <input type="range" id="heightSlider" min="10" max="100" value="30" step="1">
+          <span class="slider-val"><span id="heightValue">30</span> см</span>
+        </div>
+        <div class="step-hint">Автоматический расчёт поддерживается до 100 см. Для букв выше 1 м нужен индивидуальный расчёт.</div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="step-num">03</span><span class="step-title">Тип букв</span></div>
+        <div class="card-grid" id="typeGrid"></div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="step-num">04</span><span class="step-title">Шрифт</span></div>
+        <div class="seg" id="fontSeg"></div>
+      </div>
+
+      <div class="step">
+        <div class="row">
+          <div>
+            <div class="step-head"><span class="step-num">05</span><span class="step-title">Место использования</span></div>
+            <div class="seg" id="placeSeg"></div>
+          </div>
+          <div>
+            <div class="step-head"><span class="step-num">06</span><span class="step-title">Класс исполнения</span></div>
+            <div class="seg" id="classSeg"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="step-num">07</span><span class="step-title">Подложка / основание</span></div>
+        <div class="card-grid cols-2" id="backingGrid"></div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="step-num">08</span><span class="step-title">Монтаж</span></div>
+        <div class="card-grid cols-2" id="mountGrid"></div>
+      </div>
+
+      <div class="step">
+        <div class="row">
+          <div>
+            <div class="step-head"><span class="step-num">09</span><span class="step-title">Цвет лица</span></div>
+            <select class="color-select" id="faceColor"></select>
+            <div class="color-note">Лицо светится. Для него доступны плёнки ORACAL 8500 Translucent или УФ-печать.</div>
+          </div>
+          <div>
+            <div class="step-head"><span class="step-num">10</span><span class="step-title">Цвет борта</span></div>
+            <select class="color-select" id="edgeColor"></select>
+            <div class="color-note">Борт не светится. Для него доступны плёнки ORACAL 641 или полноцветная УФ-печать.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="step-num">11</span><span class="step-title">Дополнительно</span></div>
+        <label class="checkline">
+          <input type="checkbox" id="thinElements">
+          <span>
+            <span class="t">Тонкие элементы / сложные внутренние формы</span><br>
+            <span class="s">+25%</span>
+          </span>
+        </label>
+      </div>
+
+    </div>
+
+    <div class="side">
+      <div class="facade" id="facade" data-light="front" data-place="street">
+        <div class="letters-wrap backing-composite" id="lettersWrap">
+          <div class="dim-h">
+            <span class="arrow top">▲</span>
+            <span class="line"></span>
+            <span class="arrow bottom">▼</span>
+            <span class="label" id="dimHeightLabel">Высота ~ 30 см</span>
+          </div>
+          <div class="glyph-row" id="glyphRow"></div>
+          <div class="frame-rail" id="railUpper"></div>
+          <div class="frame-rail" id="railLower"></div>
+          <div class="dim-w" id="dimW">
+            <span class="arrow left">◀</span>
+            <span class="line"></span>
+            <span class="arrow right">▶</span>
+            <span class="label" id="dimWidthLabel">Ширина ~ 1.27 м</span>
+          </div>
+          <div class="dim-plate" id="dimPlate">
+            <span class="arrow left">◀</span>
+            <span class="line"></span>
+            <span class="arrow right">▶</span>
+            <span class="label" id="dimPlateLabel">Подложка ~ 1.37 м</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mount-indicator">
+        <div class="bars" id="mountBars">
+          <div class="bar" data-tier="none" style="height:10px"></div>
+          <div class="bar" data-tier="facade3" style="height:22px"></div>
+          <div class="bar" data-tier="facade5" style="height:34px"></div>
+          <div class="bar" data-tier="custom" style="height:40px"></div>
+        </div>
+        <span class="label" id="mountLabel">Без монтажа</span>
+      </div>
+
+      <div class="tags" id="tags"></div>
+
+      <div class="price-block">
+        <div class="price-label">Итого</div>
+        <div class="price-value"><span id="priceValue">0</span> ₽</div>
+        <div class="price-note" id="priceNote">Расчёт по прайсу компании. Финальная смета — после замера и уточнения макета.</div>
+      </div>
+
+      <button class="cta" id="openModal">Отправить расчёт</button>
+      <div class="disclaimer">Отправим параметры, ориентировочную стоимость и страницу заявки вам на email, нам — на почту и в Telegram.</div>
+
+      <details class="accordion" open>
+        <summary>Детали расчёта</summary>
+        <div class="accordion-body" id="breakdown"></div>
+      </details>
+
+      <details class="accordion">
+        <summary>Состав конструкции</summary>
+        <div class="accordion-body"><ul class="kp-list" id="construction"></ul></div>
+      </details>
+
+      <details class="accordion">
+        <summary>Описание для КП</summary>
+        <div class="accordion-body">
+          <textarea class="kp-text" id="kpText" readonly></textarea>
+          <button class="copy-btn" id="copyKp">Скопировать</button>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div id="modalForm">
+      <h2>Отправить расчёт</h2>
+      <p>Передадим параметры и ориентировочную стоимость менеджеру — уточним детали и пришлём финальную смету.</p>
+      <label for="nameInput">Имя</label>
+      <input type="text" id="nameInput" placeholder="Как к вам обращаться">
+      <label for="phoneInput">Телефон</label>
+      <input type="tel" id="phoneInput" placeholder="+7 (___) ___-__-__">
+      <label for="emailInput">Email <span style="color:var(--text-faint);">(необязательно)</span></label>
+      <input type="email" id="emailInput" placeholder="you@company.ru">
+      <div class="error-text" id="formError"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="closeModal">Отмена</button>
+        <button class="cta" id="submitModal">Отправить</button>
+      </div>
+    </div>
+    <div id="modalSuccess" class="success-state" style="display:none;">
+      <div class="mark">✓</div>
+      <h2>Заявка отправлена</h2>
+      <p>Мы свяжемся с вами в ближайшее время.</p>
+      <button class="btn-ghost" id="closeSuccess" style="width:100%;">Готово</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CONFIG = {
+  letterTypes: [
+    { val:"flat_plain",   label:"Несветовые плоские",              sub:"от 10 см", rate:80,  depth:5,  lit:false, light:"off" },
+    { val:"flat_volume",  label:"Несветовые объёмные",              sub:"от 10 см", rate:80,  depth:40, lit:false, light:"volume" },
+    { val:"lit_face",     label:"Световое лицо",                    sub:"от 10 см", rate:80, depth:60, lit:true,  light:"front" },
+    { val:"lit_face_side",label:"Световой борт и лицо",             sub:"от 16 см", rate:80, depth:70, lit:true,  light:"front-strong" },
+    { val:"lit_side_only",label:"Лицо не световое, торцы световые", sub:"от 16 см", rate:80, depth:65, lit:true,  light:"edge" },
+    { val:"halo",         label:"Контражур",                        sub:"от 16 см", rate:80, depth:60, lit:true,  light:"halo" },
+    { val:"lit_halo",     label:"Световое лицо + контражур",        sub:"от 16 см", rate:80, depth:70, lit:true,  light:"front-halo" },
+    { val:"rgb",          label:"RGB",                              sub:"от 20 см", rate:80, depth:70, lit:true,  light:"rgb" },
+    { val:"retro",        label:"Ретро с лампами",                  sub:"от 30 см", rate:80, depth:90, lit:true,  light:"retro" },
+    { val:"day_night",    label:"Буквы день/ночь",                  sub:"от 10 см", rate:80, depth:60, lit:true,  light:"daynight" },
+  ],
+  fonts: [
+    { val:"simple", label:"Простой без засечек", mult:1,    family:"'Bebas Neue', sans-serif" },
+    { val:"serif",  label:"С засечками",         mult:1.12, family:"'Playfair Display', serif" },
+    { val:"script", label:"Рукописный / декоративный", mult:1.3, family:"'Pacifico', cursive" },
+  ],
+  places: [
+    { val:"interior", label:"Интерьер", mult:0.85 },
+    { val:"street",   label:"Улица",    mult:1.0 },
+  ],
+  classes: [
+    { val:"eco",      label:"Эконом",   mult:0.85 },
+    { val:"standard", label:"Стандарт", mult:1.0 },
+    { val:"special",  label:"Спец",     mult:1.25 },
+  ],
+  backings: [
+    { val:"none",        label:"Без подложки",      sub:"без основания", pricePerM2:0,     css:"backing-none" },
+    { val:"pvc",          label:"ПВХ подложка",       sub:"5 000 ₽/м²",  pricePerM2:5000,  css:"backing-pvc" },
+    { val:"composite",    label:"Композитная подложка",sub:"7 500 ₽/м²", pricePerM2:7500,  css:"backing-composite" },
+    { val:"transparent",  label:"Прозрачная подложка", sub:"15 000 ₽/м²",pricePerM2:15000, css:"backing-transparent" },
+    { val:"frame",         label:"Рама",               sub:"1 000 ₽/м²",  pricePerM2:1000, css:"backing-frame" },
+  ],
+  mounts: [
+    { val:"none",     label:"Без монтажа",              sub:"без доплаты",       percent:0,    min:0 },
+    { val:"facade3",  label:"Фасадный монтаж до 3 м",   sub:"25% / min 8 000 ₽", percent:0.25, min:8000 },
+    { val:"facade5",  label:"Фасадный монтаж до 5 м",   sub:"30% / min 8 000 ₽", percent:0.30, min:8000 },
+    { val:"custom",   label:"Сложный монтаж / выше 5 м",sub:"индивидуально",     percent:null, min:null },
+  ],
+  faceColors: [
+    { name:"ORACAL 8500 010 White", hex:"#f4f2ec" },
+    { name:"ORACAL 8500 Translucent Yellow", hex:"#ffd23f" },
+    { name:"ORACAL 8500 Translucent Red", hex:"#ff5252" },
+    { name:"ORACAL 8500 Translucent Blue", hex:"#4da3ff" },
+    { name:"ORACAL 8500 Translucent Green", hex:"#4ddb8a" },
+    { name:"ORACAL 8500 Translucent Orange", hex:"#ff9a3d" },
+  ],
+  edgeColors: [
+    { name:"ORACAL 641 010 White", hex:"#f4f2ec" },
+    { name:"ORACAL 641 070 Black", hex:"#1a1c1f" },
+    { name:"ORACAL 641 031 Red", hex:"#d93636" },
+    { name:"ORACAL 641 052 Blue", hex:"#3068c9" },
+    { name:"ORACAL 641 021 Yellow", hex:"#f2c230" },
+    { name:"ORACAL 641 060 Green", hex:"#3a9e5f" },
+    { name:"ORACAL 641 073 Grey", hex:"#8a8f98" },
+    { name:"ORACAL 641 Silver Metallic", hex:"#c8ccd2" },
+    { name:"ORACAL 641 Gold Metallic", hex:"#d4af61" },
+    { name:"ORACAL 641 034 Orange", hex:"#e2792f" },
+  ],
+  charWidthRatio: 0.70,
+  thinElementsSurcharge: 0.25,
+  minOrder: 12000,
+  LEADS_WEBHOOK_URL: ""
+};
+
+const state = {
+  type: CONFIG.letterTypes[2],
+  font: CONFIG.fonts[0],
+  place: CONFIG.places[1],
+  cls: CONFIG.classes[1],
+  backing: CONFIG.backings[2],
+  mount: CONFIG.mounts[0],
+  thin: false
+};
+
+const $ = (id) => document.getElementById(id);
+
+function buildCardGrid(containerId, items, stateKey){
+  const el = $(containerId);
+  el.innerHTML = "";
+  items.forEach(item=>{
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "opt-card" + (state[stateKey].val === item.val ? " active" : "");
+    card.innerHTML = "<div class=\"t\">" + item.label + "</div><div class=\"s\">" + item.sub + "</div>";
+    card.addEventListener("click", ()=>{
+      state[stateKey] = item;
+      el.querySelectorAll(".opt-card").forEach(c=>c.classList.remove("active"));
+      card.classList.add("active");
+      onSelectionChange();
+    });
+    el.appendChild(card);
+  });
+}
+
+function buildSeg(containerId, items, stateKey){
+  const el = $(containerId);
+  el.innerHTML = "";
+  items.forEach(item=>{
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = state[stateKey].val === item.val ? "active" : "";
+    btn.textContent = item.label;
+    btn.addEventListener("click", ()=>{
+      state[stateKey] = item;
+      el.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      onSelectionChange();
+    });
+    el.appendChild(btn);
+  });
+}
+
+function buildColorSelect(id, list){
+  const sel = $(id);
+  sel.innerHTML = list.map(c => "<option value=\"" + c.hex + "\">" + c.name + "</option>").join("");
+}
+
+buildCardGrid("typeGrid", CONFIG.letterTypes, "type");
+buildSeg("fontSeg", CONFIG.fonts, "font");
+buildSeg("placeSeg", CONFIG.places, "place");
+buildSeg("classSeg", CONFIG.classes, "cls");
+buildCardGrid("backingGrid", CONFIG.backings, "backing");
+buildCardGrid("mountGrid", CONFIG.mounts, "mount");
+buildColorSelect("faceColor", CONFIG.faceColors);
+buildColorSelect("edgeColor", CONFIG.edgeColors);
+$("faceColor").selectedIndex = 0;
+$("edgeColor").selectedIndex = 0;
+
+$("thinElements").addEventListener("change", (e)=>{ state.thin = e.target.checked; calculate(); });
+$("faceColor").addEventListener("change", onSelectionChange);
+$("edgeColor").addEventListener("change", onSelectionChange);
+
+function normalizeText(text){ return text.trim().replace(/\s+/g," "); }
+function countLetters(text){
+  const t = normalizeText(text).replace(/\s/g,"");
+  return Math.max(t.length, 1);
+}
+function renderGlyphs(text){
+  const row = $("glyphRow");
+  row.style.fontFamily = state.font.family;
+  const source = normalizeText(text).length ? normalizeText(text) : "A";
+  const chars = source.split("");
+  row.innerHTML = "";
+  chars.forEach((ch,i)=>{
+    const span = document.createElement("span");
+    if(ch === " "){ span.className = "glyph space"; }
+    else{
+      span.className = "glyph";
+      span.textContent = ch;
+      span.style.animationDelay = (i*0.025)+"s";
+    }
+    row.appendChild(span);
+  });
+  const heightCm = parseFloat($("heightSlider").value) || 30;
+  const size = Math.max(18, Math.min(220, heightCm * 3.6));
+  row.style.fontSize = size + "px";
+  fitGlyphRowToFacade();
+}
+
+function positionDimensionLines(){
+  const wrap = $("lettersWrap");
+  const row = $("glyphRow");
+  const dimW = $("dimW");
+  if(!wrap || !row || !dimW) return;
+  const wrapRect = wrap.getBoundingClientRect();
+  const rowRect = row.getBoundingClientRect();
+  if(rowRect.width === 0) return;
+  const left = rowRect.left - wrapRect.left;
+  const right = wrapRect.right - rowRect.right;
+  dimW.style.left = left + "px";
+  dimW.style.right = right + "px";
+
+  const railUpper = $("railUpper");
+  const railLower = $("railLower");
+  if(railUpper && railLower){
+    const rowTopY = rowRect.top - wrapRect.top;
+    railUpper.style.top = (rowTopY + rowRect.height * 0.32) + "px";
+    railLower.style.top = (rowTopY + rowRect.height * 0.72) + "px";
+  }
+}
+
+function fitGlyphRowToFacade(){
+  const facade = $("facade");
+  const row = $("glyphRow");
+  const wrap = $("lettersWrap");
+  if(!facade || !row || !row.firstChild) return;
+  const cs = getComputedStyle(facade);
+  const horizontalPadding = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+  const maxWidth = facade.clientWidth - horizontalPadding - 10;
+  let size = parseFloat(row.style.fontSize) || 100;
+  let guard = 0;
+  while(row.scrollWidth > maxWidth && size > 14 && guard < 80){
+    size -= 2;
+    row.style.fontSize = size + "px";
+    guard++;
+  }
+  if(wrap) wrap.style.fontSize = size + "px";
+}
+
+function updateFacadeVisuals(){
+  const facade = $("facade");
+  const wrap = $("lettersWrap");
+  const t = state.type;
+
+  facade.dataset.light = t.light;
+  facade.dataset.place = state.place.val;
+
+  facade.style.setProperty("--face-color", $("faceColor").value);
+  facade.style.setProperty("--edge-color", $("edgeColor").value);
+
+  wrap.className = "letters-wrap " + state.backing.css;
+}
+
+function updateMountIndicator(){
+  const bars = document.querySelectorAll("#mountBars .bar");
+  bars.forEach(b=> b.classList.toggle("active", b.dataset.tier === state.mount.val));
+  $("mountLabel").textContent = "Монтаж: " + state.mount.label;
+}
+
+function onSelectionChange(){
+  renderGlyphs($("signText").value);
+  updateFacadeVisuals();
+  updateMountIndicator();
+  calculate();
+}
+
+$("signText").addEventListener("input", (e)=>{
+  renderGlyphs(e.target.value);
+  calculate();
+});
+$("heightSlider").addEventListener("input", (e)=>{
+  $("heightValue").textContent = e.target.value;
+  renderGlyphs($("signText").value);
+  calculate();
+});
+
+function formatMoney(n){ return Math.round(n).toLocaleString("ru-RU"); }
+
+function calculate(){
+  const rawText = $("signText").value;
+  const letterCount = countLetters(rawText);
+  const height = parseFloat($("heightSlider").value);
+  const t = state.type;
+
+  let unit = height * t.rate * state.font.mult * state.place.mult * state.cls.mult;
+  let lettersSubtotal = unit * letterCount;
+  const thinAddon = state.thin ? lettersSubtotal * CONFIG.thinElementsSurcharge : 0;
+  const lettersTotal = lettersSubtotal + thinAddon;
+
+  const widthCm = letterCount * height * CONFIG.charWidthRatio;
+  const areaM2 = (widthCm/100) * (height/100);
+  const backingCost = areaM2 * state.backing.pricePerM2;
+
+  const preMount = lettersTotal + backingCost;
+
+  let mountCost = 0;
+  let mountIsCustom = state.mount.val === "custom";
+  if(!mountIsCustom && state.mount.percent > 0){
+    mountCost = Math.max(preMount * state.mount.percent, state.mount.min);
+  }
+
+  let total = preMount + mountCost;
+  if(!mountIsCustom) total = Math.max(total, CONFIG.minOrder);
+
+  const bpCount = t.lit ? Math.max(1, Math.ceil((widthCm/100)/2)) : 0;
+
+  if(mountIsCustom){
+    $("priceValue").textContent = formatMoney(total) + " + монтаж";
+    $("priceNote").textContent = "Монтаж выше 5 м считается индивидуально после осмотра объекта.";
+  } else {
+    $("priceValue").textContent = formatMoney(total);
+    $("priceNote").textContent = "Расчёт по прайсу компании. Финальная смета — после замера и уточнения макета.";
+  }
+
+  $("dimHeightLabel").textContent = "Высота ~ " + height + " см";
+  $("dimWidthLabel").textContent = "Ширина ~ " + (widthCm/100).toFixed(2) + " м";
+
+  positionDimensionLines();
+
+  const hasPlate = ["pvc","composite","transparent"].includes(state.backing.val);
+  $("dimPlate").classList.toggle("show", hasPlate);
+  if(hasPlate){
+    const plateWidthM = (widthCm + 10) / 100;
+    $("dimPlateLabel").textContent = "Подложка ~ " + plateWidthM.toFixed(2) + " м";
+  }
+
+  $("tags").innerHTML =
+    "<span class=\"tag muted\">Размеры примерные</span>" +
+    "<span class=\"tag\">Высота букв: " + height + " см</span>" +
+    "<span class=\"tag\">Композиция: ~" + (widthCm/100).toFixed(2) + " м</span>" +
+    "<span class=\"tag\">Глубина: " + t.depth + " мм</span>" +
+    "<span class=\"tag\">" + (t.lit ? "БП: " + bpCount + "×60Вт" : "БП: —") + "</span>";
+
+  let rows = "<div class=\"breakdown-row\"><span>Буквы (" + letterCount + " шт × " + formatMoney(unit) + " ₽)</span><span>" + formatMoney(lettersSubtotal) + " ₽</span></div>";
+  if(state.thin){
+    rows += "<div class=\"breakdown-row\"><span>Тонкие элементы (+25%)</span><span>" + formatMoney(thinAddon) + " ₽</span></div>";
+  }
+  rows += "<div class=\"breakdown-row\"><span>Подложка / основание</span><span>" + (state.backing.pricePerM2 ? formatMoney(backingCost) + " ₽" : "—") + "</span></div>";
+  rows += "<div class=\"breakdown-row\"><span>Монтаж</span><span>" + (mountIsCustom ? "по запросу" : (mountCost ? "+" + formatMoney(mountCost) + " ₽" : "включён")) + "</span></div>";
+  rows += "<div class=\"breakdown-row\"><span><strong>Итого</strong></span><span><strong>" + (mountIsCustom ? formatMoney(total) + " + монтаж" : formatMoney(total) + " ₽") + "</strong></span></div>";
+  $("breakdown").innerHTML = rows;
+
+  $("construction").innerHTML =
+    "<li>Тип букв: " + t.label + " (" + t.sub + ")</li>" +
+    "<li>Высота: " + height + " см, глубина: " + t.depth + " мм</li>" +
+    "<li>Материал лица: " + $("faceColor").options[$("faceColor").selectedIndex].text + "</li>" +
+    "<li>Материал борта: " + $("edgeColor").options[$("edgeColor").selectedIndex].text + "</li>" +
+    "<li>Шрифт: " + state.font.label + "</li>" +
+    "<li>Место использования: " + state.place.label + ", класс исполнения: " + state.cls.label + "</li>" +
+    "<li>Основание: " + state.backing.label + "</li>" +
+    "<li>Монтаж: " + state.mount.label + "</li>" +
+    "<li>Электрика: " + (t.lit ? bpCount + " × блок питания 60 Вт" : "не требуется") + "</li>" +
+    (state.thin ? "<li>Тонкие элементы / сложные внутренние формы</li>" : "");
+
+  const priceStr = mountIsCustom ? formatMoney(total) + " ₽ + монтаж по запросу" : formatMoney(total) + " ₽";
+  $("kpText").value =
+    "Вывеска «" + (normalizeText(rawText) || "—") + "» — объёмные буквы, тип «" + t.label + "», высота " + height + " см, глубина " + t.depth + " мм.\n" +
+    "Шрифт: " + state.font.label + ". Место установки: " + state.place.label + ", класс исполнения: " + state.cls.label + ".\n" +
+    "Лицо: " + $("faceColor").options[$("faceColor").selectedIndex].text + ". Борт: " + $("edgeColor").options[$("edgeColor").selectedIndex].text + ".\n" +
+    "Основание: " + state.backing.label + ". Монтаж: " + state.mount.label + ".\n" +
+    "Ориентировочная стоимость: " + priceStr + " (без учёта НДС и доставки, финальная смета — после замера).";
+}
+
+$("copyKp").addEventListener("click", ()=>{
+  navigator.clipboard.writeText($("kpText").value).then(()=>{
+    const btn = $("copyKp");
+    const old = btn.textContent;
+    btn.textContent = "Скопировано";
+    setTimeout(()=> btn.textContent = old, 1500);
+  });
+});
+
+$("resetBtn").addEventListener("click", ()=>{
+  $("signText").value = "А-РИАЛ";
+  $("heightSlider").value = 30;
+  $("heightValue").textContent = 30;
+  state.type = CONFIG.letterTypes[2];
+  state.font = CONFIG.fonts[0];
+  state.place = CONFIG.places[1];
+  state.cls = CONFIG.classes[1];
+  state.backing = CONFIG.backings[2];
+  state.mount = CONFIG.mounts[0];
+  state.thin = false;
+  $("thinElements").checked = false;
+  buildCardGrid("typeGrid", CONFIG.letterTypes, "type");
+  buildSeg("fontSeg", CONFIG.fonts, "font");
+  buildSeg("placeSeg", CONFIG.places, "place");
+  buildSeg("classSeg", CONFIG.classes, "cls");
+  buildCardGrid("backingGrid", CONFIG.backings, "backing");
+  buildCardGrid("mountGrid", CONFIG.mounts, "mount");
+  $("faceColor").selectedIndex = 0;
+  $("edgeColor").selectedIndex = 0;
+  renderGlyphs($("signText").value);
+  onSelectionChange();
+});
+
+const overlay = $("modalOverlay");
+$("openModal").addEventListener("click", ()=>{
+  overlay.classList.add("open");
+  $("modalForm").style.display = "block";
+  $("modalSuccess").style.display = "none";
+  $("formError").textContent = "";
+});
+$("closeModal").addEventListener("click", ()=> overlay.classList.remove("open"));
+$("closeSuccess").addEventListener("click", ()=> overlay.classList.remove("open"));
+overlay.addEventListener("click", (e)=>{ if(e.target === overlay) overlay.classList.remove("open"); });
+
+$("submitModal").addEventListener("click", async ()=>{
+  const name = $("nameInput").value.trim();
+  const phone = $("phoneInput").value.trim();
+  const email = $("emailInput").value.trim();
+  const phoneOk = /^[\d\s()+\-]{10,}$/.test(phone);
+  const emailOk = email === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  if(!name || !phoneOk || !emailOk){
+    $("formError").textContent = "Проверьте имя, телефон" + (email ? " и email" : "");
+    return;
+  }
+  $("formError").textContent = "";
+
+  const payload = {
+    name: name, phone: phone, email: email,
+    price: $("priceValue").textContent + " ₽",
+    signText: $("signText").value,
+    height: $("heightSlider").value + " см",
+    type: state.type.label,
+    font: state.font.label,
+    place: state.place.label,
+    cls: state.cls.label,
+    backing: state.backing.label,
+    mount: state.mount.label,
+    faceColor: $("faceColor").options[$("faceColor").selectedIndex].text,
+    edgeColor: $("edgeColor").options[$("edgeColor").selectedIndex].text,
+    thinElements: state.thin,
+    source: "letters-calculator-widget"
+  };
+
+  try{
+    if(CONFIG.LEADS_WEBHOOK_URL){
+      await fetch(CONFIG.LEADS_WEBHOOK_URL, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(payload)
+      });
+    } else {
+      console.log("Заявка (webhook не настроен):", payload);
+    }
+    $("modalForm").style.display = "none";
+    $("modalSuccess").style.display = "block";
+  } catch(err){
+    $("formError").textContent = "Не удалось отправить заявку, попробуйте ещё раз";
+    console.error(err);
+  }
+});
+
+renderGlyphs($("signText").value);
+onSelectionChange();
+
+let resizeTimer;
+window.addEventListener("resize", ()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(()=>{ fitGlyphRowToFacade(); positionDimensionLines(); }, 120);
+});
+</script>
+<script>
+// ===== ВРЕМЕННАЯ ДИАГНОСТИКА ПЕРЕПОЛНЕНИЯ (безопасно удалить позже) =====
+(function(){
+  function runDiagnostics(){
+    const vw = window.innerWidth;
+    const docWidth = document.documentElement.scrollWidth;
+    const overflowAmount = docWidth - vw;
+
+    // находим все элементы, чей правый край выходит за пределы экрана
+    const all = document.querySelectorAll("body *");
+    let worst = null;
+    let worstRight = 0;
+    all.forEach(el=>{
+      const r = el.getBoundingClientRect();
+      if(r.right > vw && r.right > worstRight && r.width > 0){
+        worstRight = r.right;
+        worst = el;
+      }
+    });
+
+    // панель с цифрами вверху экрана
+    const panel = document.createElement("div");
+    panel.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:999999;background:#ff2d55;color:#fff;font-family:monospace;font-size:12px;padding:8px 10px;line-height:1.6;";
+    panel.innerHTML =
+      "Ширина экрана (innerWidth): " + vw + "px<br>" +
+      "Реальная ширина страницы (scrollWidth): " + docWidth + "px<br>" +
+      "Переполнение: " + overflowAmount + "px<br>" +
+      "Виновный элемент: " + (worst ? (worst.tagName + (worst.className ? "." + String(worst.className).replace(/\s+/g,".") : "") + (worst.id ? "#" + worst.id : "")) : "не найден (возможно overflow-x:hidden уже всё скрыл)");
+
+    document.body.prepend(panel);
+    document.body.style.paddingTop = panel.offsetHeight + "px";
+
+    // подсвечиваем виновный элемент красной рамкой
+    if(worst){
+      worst.style.outline = "4px solid #ff2d55";
+      worst.style.outlineOffset = "-2px";
+    }
+  }
+  window.addEventListener("load", ()=> setTimeout(runDiagnostics, 600));
+})();
+</script>
+</body>
+</html>
