@@ -85,6 +85,16 @@
 
   select.color-select{ width:100%; background:var(--surface); border:1px solid var(--line); color:var(--text); border-radius:var(--radius-sm); padding:11px 12px; font-family:var(--body); font-size:14px; }
   .color-note{ font-size:12px; color:var(--text-faint); margin-top:8px; line-height:1.5; }
+  .swatch-row{ display:flex; flex-wrap:wrap; gap:8px; }
+  .swatch{
+    width:30px; height:30px; border-radius:50%; cursor:pointer;
+    border:2px solid transparent; box-shadow:inset 0 0 0 1px rgba(255,255,255,.15);
+    transition:transform .12s ease, border-color .12s ease;
+  }
+  .swatch:hover{ transform:scale(1.08); }
+  .swatch.active{ border-color:var(--accent); box-shadow:0 0 0 2px var(--bg), 0 0 0 3px var(--accent); }
+  .swatch-label{ font-size:12px; color:var(--text-soft); margin-top:8px; font-family:var(--mono); }
+  .visually-hidden{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 
   .checkline{ display:flex; align-items:flex-start; gap:10px; cursor:pointer; }
   .checkline input{ margin-top:3px; accent-color:var(--accent); width:16px; height:16px; }
@@ -274,6 +284,7 @@
     .mount-indicator{ flex-wrap:wrap; }
   }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -303,6 +314,7 @@
           <span class="slider-val"><span id="heightValue">30</span> см</span>
         </div>
         <div class="step-hint">Автоматический расчёт поддерживается до 100 см. Для букв выше 1 м нужен индивидуальный расчёт.</div>
+        <div class="step-hint" id="minHeightWarning" style="display:none; color:var(--danger);"></div>
       </div>
 
       <div class="step">
@@ -342,12 +354,16 @@
         <div class="row">
           <div>
             <div class="step-head"><span class="step-num">09</span><span class="step-title">Цвет лица</span></div>
-            <select class="color-select" id="faceColor"></select>
+            <div class="swatch-row" id="faceSwatches"></div>
+            <div class="swatch-label" id="faceColorLabel"></div>
+            <select class="color-select visually-hidden" id="faceColor"></select>
             <div class="color-note">Лицо светится. Для него доступны плёнки ORACAL 8500 Translucent или УФ-печать.</div>
           </div>
           <div>
             <div class="step-head"><span class="step-num">10</span><span class="step-title">Цвет борта</span></div>
-            <select class="color-select" id="edgeColor"></select>
+            <div class="swatch-row" id="edgeSwatches"></div>
+            <div class="swatch-label" id="edgeColorLabel"></div>
+            <select class="color-select visually-hidden" id="edgeColor"></select>
             <div class="color-note">Борт не светится. Для него доступны плёнки ORACAL 641 или полноцветная УФ-печать.</div>
           </div>
         </div>
@@ -412,6 +428,7 @@
       </div>
 
       <button class="cta" id="openModal">Отправить расчёт</button>
+      <button class="btn-ghost" id="downloadPng" style="width:100%; margin-top:8px;">⬇ Скачать эскиз (PNG)</button>
       <div class="disclaimer">Отправим параметры, ориентировочную стоимость и страницу заявки вам на email, нам — на почту и в Telegram.</div>
 
       <details class="accordion" open>
@@ -446,6 +463,7 @@
       <input type="tel" id="phoneInput" placeholder="+7 (___) ___-__-__">
       <label for="emailInput">Email <span style="color:var(--text-faint);">(необязательно)</span></label>
       <input type="email" id="emailInput" placeholder="you@company.ru">
+      <input type="text" id="websiteHoneypot" name="website" autocomplete="off" tabindex="-1" style="position:absolute; left:-9999px; width:1px; height:1px; opacity:0;" aria-hidden="true">
       <div class="error-text" id="formError"></div>
       <div class="modal-actions">
         <button class="btn-ghost" id="closeModal">Отмена</button>
@@ -464,16 +482,16 @@
 <script>
 const CONFIG = {
   letterTypes: [
-    { val:"flat_plain",   label:"Несветовые плоские",              sub:"от 10 см", rate:80,  depth:5,  lit:false, light:"off" },
-    { val:"flat_volume",  label:"Несветовые объёмные",              sub:"от 10 см", rate:80,  depth:40, lit:false, light:"volume" },
-    { val:"lit_face",     label:"Световое лицо",                    sub:"от 10 см", rate:80, depth:60, lit:true,  light:"front" },
-    { val:"lit_face_side",label:"Световой борт и лицо",             sub:"от 16 см", rate:80, depth:70, lit:true,  light:"front-strong" },
-    { val:"lit_side_only",label:"Лицо не световое, торцы световые", sub:"от 16 см", rate:80, depth:65, lit:true,  light:"edge" },
-    { val:"halo",         label:"Контражур",                        sub:"от 16 см", rate:80, depth:60, lit:true,  light:"halo" },
-    { val:"lit_halo",     label:"Световое лицо + контражур",        sub:"от 16 см", rate:80, depth:70, lit:true,  light:"front-halo" },
-    { val:"rgb",          label:"RGB",                              sub:"от 20 см", rate:80, depth:70, lit:true,  light:"rgb" },
-    { val:"retro",        label:"Ретро с лампами",                  sub:"от 30 см", rate:80, depth:90, lit:true,  light:"retro" },
-    { val:"day_night",    label:"Буквы день/ночь",                  sub:"от 10 см", rate:80, depth:60, lit:true,  light:"daynight" },
+    { val:"flat_plain",   label:"Несветовые плоские",              sub:"от 10 см", minHeight:10, rate:80,  depth:5,  lit:false, light:"off" },
+    { val:"flat_volume",  label:"Несветовые объёмные",              sub:"от 10 см", minHeight:10, rate:80,  depth:40, lit:false, light:"volume" },
+    { val:"lit_face",     label:"Световое лицо",                    sub:"от 10 см", minHeight:10, rate:80, depth:60, lit:true,  light:"front" },
+    { val:"lit_face_side",label:"Световой борт и лицо",             sub:"от 16 см", minHeight:16, rate:80, depth:70, lit:true,  light:"front-strong" },
+    { val:"lit_side_only",label:"Лицо не световое, торцы световые", sub:"от 16 см", minHeight:16, rate:80, depth:65, lit:true,  light:"edge" },
+    { val:"halo",         label:"Контражур",                        sub:"от 16 см", minHeight:16, rate:80, depth:60, lit:true,  light:"halo" },
+    { val:"lit_halo",     label:"Световое лицо + контражур",        sub:"от 16 см", minHeight:16, rate:80, depth:70, lit:true,  light:"front-halo" },
+    { val:"rgb",          label:"RGB",                              sub:"от 20 см", minHeight:20, rate:80, depth:70, lit:true,  light:"rgb" },
+    { val:"retro",        label:"Ретро с лампами",                  sub:"от 30 см", minHeight:30, rate:80, depth:90, lit:true,  light:"retro" },
+    { val:"day_night",    label:"Буквы день/ночь",                  sub:"от 10 см", minHeight:10, rate:80, depth:60, lit:true,  light:"daynight" },
   ],
   fonts: [
     { val:"simple", label:"Простой без засечек", mult:1,    family:"'Bebas Neue', sans-serif" },
@@ -525,7 +543,7 @@ const CONFIG = {
   charWidthRatio: 0.70,
   thinElementsSurcharge: 0.25,
   minOrder: 12000,
-  LEADS_WEBHOOK_URL: ""
+  LEADS_WEBHOOK_URL: "/.netlify/functions/submit-lead"
 };
 
 const state = {
@@ -579,6 +597,30 @@ function buildSeg(containerId, items, stateKey){
 function buildColorSelect(id, list){
   const sel = $(id);
   sel.innerHTML = list.map(c => "<option value=\"" + c.hex + "\">" + c.name + "</option>").join("");
+
+  const swatchContainerId = id === "faceColor" ? "faceSwatches" : "edgeSwatches";
+  const labelId = id === "faceColor" ? "faceColorLabel" : "edgeColorLabel";
+  const container = $(swatchContainerId);
+  const label = $(labelId);
+  container.innerHTML = "";
+
+  list.forEach((c, i)=>{
+    const sw = document.createElement("button");
+    sw.type = "button";
+    sw.className = "swatch" + (i === 0 ? " active" : "");
+    sw.style.background = c.hex;
+    sw.title = c.name;
+    sw.setAttribute("aria-label", c.name);
+    sw.addEventListener("click", ()=>{
+      sel.selectedIndex = i;
+      container.querySelectorAll(".swatch").forEach(s=>s.classList.remove("active"));
+      sw.classList.add("active");
+      label.textContent = c.name;
+      onSelectionChange();
+    });
+    container.appendChild(sw);
+  });
+  label.textContent = list[0].name;
 }
 
 buildCardGrid("typeGrid", CONFIG.letterTypes, "type");
@@ -708,6 +750,14 @@ function calculate(){
   const height = parseFloat($("heightSlider").value);
   const t = state.type;
 
+  const warningEl = $("minHeightWarning");
+  if(t.minHeight && height < t.minHeight){
+    warningEl.style.display = "block";
+    warningEl.textContent = "«" + t.label + "» технологически требует высоту от " + t.minHeight + " см. При высоте " + height + " см возможно потребуется индивидуальное решение — уточните у менеджера.";
+  } else {
+    warningEl.style.display = "none";
+  }
+
   let unit = height * t.rate * state.font.mult * state.place.mult * state.cls.mult;
   let lettersSubtotal = unit * letterCount;
   const thinAddon = state.thin ? lettersSubtotal * CONFIG.thinElementsSurcharge : 0;
@@ -827,11 +877,54 @@ $("openModal").addEventListener("click", ()=>{
   $("modalSuccess").style.display = "none";
   $("formError").textContent = "";
 });
+
+$("downloadPng").addEventListener("click", async ()=>{
+  const btn = $("downloadPng");
+  const originalText = btn.textContent;
+  btn.textContent = "Готовим файл...";
+  btn.disabled = true;
+  try{
+    if(typeof html2canvas === "undefined"){
+      throw new Error("html2canvas не загрузился");
+    }
+    const target = $("facade");
+    const canvas = await html2canvas(target, {
+      backgroundColor: null,
+      scale: 2,
+      useCORS: true
+    });
+    const link = document.createElement("a");
+    link.download = "vyveska-" + (normalizeText($("signText").value) || "eskiz").replace(/\s+/g,"-") + ".png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  } catch(err){
+    console.error(err);
+    alert("Не удалось скачать эскиз. Попробуйте сделать скриншот превью вручную.");
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+});
 $("closeModal").addEventListener("click", ()=> overlay.classList.remove("open"));
 $("closeSuccess").addEventListener("click", ()=> overlay.classList.remove("open"));
 overlay.addEventListener("click", (e)=>{ if(e.target === overlay) overlay.classList.remove("open"); });
 
+let lastSubmitAt = 0;
 $("submitModal").addEventListener("click", async ()=>{
+  // honeypot: настоящие люди не видят и не заполняют это поле, боты часто заполняют всё подряд
+  if($("websiteHoneypot").value.trim() !== ""){
+    // тихо "успешно" закрываем для бота, но реально ничего не отправляем
+    $("modalForm").style.display = "none";
+    $("modalSuccess").style.display = "block";
+    return;
+  }
+
+  const now = Date.now();
+  if(now - lastSubmitAt < 15000){
+    $("formError").textContent = "Заявка уже отправлена, подождите немного перед повторной отправкой";
+    return;
+  }
+
   const name = $("nameInput").value.trim();
   const phone = $("phoneInput").value.trim();
   const email = $("emailInput").value.trim();
@@ -843,6 +936,7 @@ $("submitModal").addEventListener("click", async ()=>{
     return;
   }
   $("formError").textContent = "";
+  lastSubmitAt = now;
 
   const payload = {
     name: name, phone: phone, email: email,
@@ -858,6 +952,7 @@ $("submitModal").addEventListener("click", async ()=>{
     faceColor: $("faceColor").options[$("faceColor").selectedIndex].text,
     edgeColor: $("edgeColor").options[$("edgeColor").selectedIndex].text,
     thinElements: state.thin,
+    website: $("websiteHoneypot").value,
     source: "letters-calculator-widget"
   };
 

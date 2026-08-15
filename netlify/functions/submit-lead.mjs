@@ -25,27 +25,37 @@ export default async (req) => {
     });
   }
 
+  // Honeypot: реальные пользователи никогда не заполняют это скрытое поле
+  if (data.website && String(data.website).trim() !== "") {
+    return new Response(JSON.stringify({ ok: true, id: "skipped" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const cap = (val, max) => (val ? String(val).slice(0, max) : "");
+
   const store = getStore("leads");
   const id = Date.now() + "-" + Math.random().toString(36).slice(2, 8);
 
   const lead = {
     id,
-    name: String(data.name).slice(0, 200),
-    phone: String(data.phone).slice(0, 50),
-    email: data.email ? String(data.email).slice(0, 200) : "",
-    price: data.price || "",
-    signText: data.signText || "",
-    height: data.height || "",
-    type: data.type || "",
-    font: data.font || "",
-    place: data.place || "",
-    cls: data.cls || "",
-    backing: data.backing || "",
-    mount: data.mount || "",
-    faceColor: data.faceColor || "",
-    edgeColor: data.edgeColor || "",
+    name: cap(data.name, 200),
+    phone: cap(data.phone, 50),
+    email: cap(data.email, 200),
+    price: cap(data.price, 50),
+    signText: cap(data.signText, 200),
+    height: cap(data.height, 30),
+    type: cap(data.type, 100),
+    font: cap(data.font, 100),
+    place: cap(data.place, 50),
+    cls: cap(data.cls, 50),
+    backing: cap(data.backing, 100),
+    mount: cap(data.mount, 100),
+    faceColor: cap(data.faceColor, 100),
+    edgeColor: cap(data.edgeColor, 100),
     thinElements: !!data.thinElements,
-    source: data.source || "",
+    source: cap(data.source, 100),
     status: "new",
     createdAt: new Date().toISOString(),
   };

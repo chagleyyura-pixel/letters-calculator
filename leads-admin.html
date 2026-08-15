@@ -223,17 +223,27 @@ function render(){
   document.querySelectorAll("select.status").forEach(sel=>{
     sel.addEventListener("change", async (e)=>{
       const id = e.target.dataset.id;
+      const previousStatus = e.target.dataset.status;
       const status = e.target.value;
-      e.target.dataset.status = status;
       try{
-        await fetch(API_BASE + "/.netlify/functions/update-lead-status", {
+        const res = await fetch(API_BASE + "/.netlify/functions/update-lead-status", {
           method: "POST",
           headers: { "Content-Type":"application/json", "x-admin-password": PASSWORD },
           body: JSON.stringify({ id, status })
         });
+        if(!res.ok){
+          e.target.value = previousStatus;
+          alert("Не удалось изменить статус (сервер вернул ошибку). Попробуйте ещё раз.");
+          return;
+        }
+        e.target.dataset.status = status;
         const lead = allLeads.find(l=>l.id===id);
         if(lead) lead.status = status;
-      } catch(err){ console.error(err); }
+      } catch(err){
+        e.target.value = previousStatus;
+        alert("Не удалось изменить статус (нет связи с сервером). Попробуйте ещё раз.");
+        console.error(err);
+      }
     });
   });
 }
