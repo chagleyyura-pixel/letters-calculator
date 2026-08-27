@@ -79,8 +79,15 @@
       <option value="in_progress">В работе</option>
       <option value="closed">Закрытые</option>
     </select>
+    <select id="sortSelect">
+      <option value="date_desc">Сначала новые</option>
+      <option value="date_asc">Сначала старые</option>
+      <option value="price_desc">Цена: сначала дорогие</option>
+      <option value="price_asc">Цена: сначала дешёвые</option>
+    </select>
     <input type="text" id="searchInput" placeholder="Поиск по имени/телефону">
     <div class="spacer"></div>
+    <button class="refresh-btn" id="exportBtn">Экспорт CSV</button>
     <button class="refresh-btn" id="refreshBtn">Обновить</button>
   </div>
 
@@ -149,6 +156,8 @@ async function refreshLeads(){
 }
 $("refreshBtn").addEventListener("click", refreshLeads);
 $("statusFilter").addEventListener("change", render);
+$("sortSelect").addEventListener("change", render);
+$("exportBtn").addEventListener("click", exportCsv);
 $("searchInput").addEventListener("input", render);
 
 const STATUS_LABELS = { new: "Новая", in_progress: "В работе", closed: "Закрыта" };
@@ -161,6 +170,7 @@ function formatDate(iso){
 function render(){
   const statusVal = $("statusFilter").value;
   const search = $("searchInput").value.trim().toLowerCase();
+  const sortVal = $("sortSelect").value;
 
   let leads = allLeads.filter(l=>{
     if(statusVal !== "all" && l.status !== statusVal) return false;
@@ -170,6 +180,15 @@ function render(){
     }
     return true;
   });
+
+  function priceOf(l){
+    const n = parseInt(String(l.price).replace(/[^\d]/g,""), 10);
+    return isNaN(n) ? 0 : n;
+  }
+  if(sortVal === "date_desc") leads.sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+  else if(sortVal === "date_asc") leads.sort((a,b)=> new Date(a.createdAt) - new Date(b.createdAt));
+  else if(sortVal === "price_desc") leads.sort((a,b)=> priceOf(b) - priceOf(a));
+  else if(sortVal === "price_asc") leads.sort((a,b)=> priceOf(a) - priceOf(b));
 
   // Stats (over all leads, not filtered)
   const today = new Date(); today.setHours(0,0,0,0);
@@ -246,6 +265,57 @@ function render(){
       }
     });
   });
+}
+
+function exportCsv(){
+  const statusVal = $("statusFilter").value;
+  const search = $("searchInput").value.trim().toLowerCase();
+  const sortVal = $("sortSelect").value;
+
+  let leads = allLeads.filter(l=>{
+    if(statusVal !== "all" && l.status !== statusVal) return false;
+    if(search){
+      const hay = (l.name + " " + l.phone + " " + l.email).toLowerCase();
+      if(!hay.includes(search)) return false;
+    }
+    return true;
+  });
+  function priceOf(l){
+    const n = parseInt(String(l.price).replace(/[^\d]/g,""), 10);
+    return isNaN(n) ? 0 : n;
+  }
+  if(sortVal === "date_desc") leads.sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+  else if(sortVal === "date_asc") leads.sort((a,b)=> new Date(a.createdAt) - new Date(b.createdAt));
+  else if(sortVal === "price_desc") leads.sort((a,b)=> priceOf(b) - priceOf(a));
+  else if(sortVal === "price_asc") leads.sort((a,b)=> priceOf(a) - priceOf(b));
+
+  if(leads.length === 0){
+    alert("Нет заявок для экспорта (проверьте фильтр/поиск)");
+    return;
+  }
+
+  const headers = ["Дата","Имя","Телефон","Email","Текст вывески","Тип","Высота","Шрифт","Место","Класс","Подложка","Монтаж","Цена","Статус"];
+  const statusLabels = { new:"Новая", in_progress:"В работе", closed:"Закрыта" };
+
+  function csvCell(val){
+    const s = String(val == null ? "" : val).replace(/"/g,'""');
+    return '"' + s + '"';
+  }
+
+  const rows = leads.map(l => [
+    formatDate(l.createdAt), l.name, l.phone, l.email || "", l.signText || "",
+    l.type || "", l.height || "", l.font || "", l.place || "", l.cls || "",
+    l.backing || "", l.mount || "", l.price || "", statusLabels[l.status] || l.status
+  ].map(csvCell).join(","));
+
+  const csv = "\uFEFF" + headers.map(csvCell).join(",") + "\n" + rows.join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "zayavki-" + new Date().toISOString().slice(0,10) + ".csv";
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 function escapeHtml(str){
