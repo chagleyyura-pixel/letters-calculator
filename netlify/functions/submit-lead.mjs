@@ -137,6 +137,7 @@ export default async (req) => {
     thinElements: !!data.thinElements,
     source: cap(data.source, 100),
     status: "new",
+    deleted: false,
     createdAt: new Date().toISOString(),
   };
 

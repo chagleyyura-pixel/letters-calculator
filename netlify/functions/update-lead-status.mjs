@@ -42,9 +42,21 @@ export default async (req) => {
     });
   }
 
-  const { id, status } = body;
-  if (!id || !ALLOWED_STATUSES.includes(status)) {
-    return new Response(JSON.stringify({ error: "id and valid status required" }), {
+  const { id, status, deleted } = body;
+  if (!id || (status === undefined && deleted === undefined)) {
+    return new Response(JSON.stringify({ error: "id and (status or deleted) required" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  if (status !== undefined && !ALLOWED_STATUSES.includes(status)) {
+    return new Response(JSON.stringify({ error: "invalid status" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  if (deleted !== undefined && typeof deleted !== "boolean") {
+    return new Response(JSON.stringify({ error: "deleted must be boolean" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
     });
@@ -59,7 +71,8 @@ export default async (req) => {
     });
   }
 
-  lead.status = status;
+  if (status !== undefined) lead.status = status;
+  if (deleted !== undefined) lead.deleted = deleted;
   await store.setJSON(id, lead);
 
   return new Response(JSON.stringify({ ok: true }), {

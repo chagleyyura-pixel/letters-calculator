@@ -39,7 +39,11 @@
   .refresh-btn:hover{ border-color:var(--steel); color:var(--text); }
 
   table{ width:100%; border-collapse:collapse; background:var(--bg-panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
-  th, td{ padding:10px 12px; text-align:left; font-size:12.5px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th, td{ padding:10px 12px; text-align:left; font-size:12.5px; border-bottom:1px solid var(--line); vertical-align:top; overflow-wrap:anywhere; word-break:break-word; }
+  .action-btn{ background:transparent; border:1px solid var(--line); color:var(--text-soft); border-radius:6px; padding:6px 10px; font-size:12px; cursor:pointer; white-space:nowrap; }
+  .action-btn.delete-btn:hover{ border-color:var(--danger); color:var(--danger); }
+  .action-btn.restore-btn{ border-color:var(--success); color:var(--success); }
+  .action-btn.restore-btn:hover{ background:rgba(76,195,138,.12); }
   th{ background:var(--surface); font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-soft); }
   tr:last-child td{ border-bottom:none; }
   .params{ color:var(--text-faint); font-size:11.5px; line-height:1.5; max-width:280px; }
@@ -86,6 +90,9 @@
       <option value="price_asc">Цена: сначала дешёвые</option>
     </select>
     <input type="text" id="searchInput" placeholder="Поиск по имени/телефону">
+    <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text-soft); cursor:pointer; white-space:nowrap;">
+      <input type="checkbox" id="showDeletedToggle" style="accent-color:var(--accent);"> Показать удалённые
+    </label>
     <div class="spacer"></div>
     <button class="refresh-btn" id="exportBtn">Экспорт CSV</button>
     <button class="refresh-btn" id="refreshBtn">Обновить</button>
@@ -100,6 +107,7 @@
         <th>Параметры</th>
         <th>Цена</th>
         <th>Статус</th>
+        <th></th>
       </tr>
     </thead>
     <tbody id="leadsBody"></tbody>
@@ -154,10 +162,32 @@ async function refreshLeads(){
     }
   } catch(err){ console.error(err); }
 }
+
+async function setDeletedFlag(id, deleted){
+  try{
+    const res = await fetch(API_BASE + "/.netlify/functions/update-lead-status", {
+      method: "POST",
+      headers: { "Content-Type":"application/json", "x-admin-password": PASSWORD },
+      body: JSON.stringify({ id, deleted })
+    });
+    if(!res.ok){
+      alert("Не удалось изменить заявку (сервер вернул ошибку). Попробуйте ещё раз.");
+      return;
+    }
+    const lead = allLeads.find(l=>l.id===id);
+    if(lead) lead.deleted = deleted;
+    render();
+  } catch(err){
+    alert("Не удалось изменить заявку (нет связи с сервером). Попробуйте ещё раз.");
+    console.error(err);
+  }
+}
+
 $("refreshBtn").addEventListener("click", refreshLeads);
 $("statusFilter").addEventListener("change", render);
 $("sortSelect").addEventListener("change", render);
 $("exportBtn").addEventListener("click", exportCsv);
+$("showDeletedToggle").addEventListener("change", render);
 $("searchInput").addEventListener("input", render);
 
 const STATUS_LABELS = { new: "Новая", in_progress: "В работе", closed: "Закрыта" };
@@ -171,8 +201,11 @@ function render(){
   const statusVal = $("statusFilter").value;
   const search = $("searchInput").value.trim().toLowerCase();
   const sortVal = $("sortSelect").value;
+  const showDeleted = $("showDeletedToggle").checked;
 
   let leads = allLeads.filter(l=>{
+    if(showDeleted){ if(!l.deleted) return false; }
+    else{ if(l.deleted) return false; }
     if(statusVal !== "all" && l.status !== statusVal) return false;
     if(search){
       const hay = (l.name + " " + l.phone + " " + l.email).toLowerCase();
@@ -190,16 +223,19 @@ function render(){
   else if(sortVal === "price_desc") leads.sort((a,b)=> priceOf(b) - priceOf(a));
   else if(sortVal === "price_asc") leads.sort((a,b)=> priceOf(a) - priceOf(b));
 
-  // Stats (over all leads, not filtered)
+  // Stats считаются только по неудалённым заявкам
+  const activeLeads = allLeads.filter(l=>!l.deleted);
+
+  // Stats (over active, non-deleted leads only)
   const today = new Date(); today.setHours(0,0,0,0);
   const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate()-7);
-  const todayCount = allLeads.filter(l=> new Date(l.createdAt) >= today).length;
-  const weekCount = allLeads.filter(l=> new Date(l.createdAt) >= weekAgo).length;
-  const prices = allLeads.map(l=> parseInt(String(l.price).replace(/[^\d]/g,""),10)).filter(n=>!isNaN(n));
+  const todayCount = activeLeads.filter(l=> new Date(l.createdAt) >= today).length;
+  const weekCount = activeLeads.filter(l=> new Date(l.createdAt) >= weekAgo).length;
+  const prices = activeLeads.map(l=> parseInt(String(l.price).replace(/[^\d]/g,""),10)).filter(n=>!isNaN(n));
   const avgPrice = prices.length ? Math.round(prices.reduce((a,b)=>a+b,0)/prices.length).toLocaleString("ru-RU") : "—";
 
   $("stats").innerHTML = `
-    <div class="stat"><div class="n">${allLeads.length}</div><div class="l">Всего заявок</div></div>
+    <div class="stat"><div class="n">${activeLeads.length}</div><div class="l">Всего заявок</div></div>
     <div class="stat"><div class="n">${todayCount}</div><div class="l">Сегодня</div></div>
     <div class="stat"><div class="n">${weekCount}</div><div class="l">За 7 дней</div></div>
     <div class="stat"><div class="n">${avgPrice} ₽</div><div class="l">Средний чек</div></div>
@@ -236,8 +272,25 @@ function render(){
           <option value="closed" ${l.status==="closed"?"selected":""}>Закрыта</option>
         </select>
       </td>
+      <td>
+        ${l.deleted
+          ? `<button class="action-btn restore-btn" data-id="${l.id}">Восстановить</button>`
+          : `<button class="action-btn delete-btn" data-id="${l.id}">Удалить</button>`}
+      </td>
     </tr>
   `).join("");
+
+  document.querySelectorAll(".delete-btn").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      if(!confirm("Пометить эту заявку как удалённую? Её можно будет восстановить через «Показать удалённые».")) return;
+      await setDeletedFlag(btn.dataset.id, true);
+    });
+  });
+  document.querySelectorAll(".restore-btn").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      await setDeletedFlag(btn.dataset.id, false);
+    });
+  });
 
   document.querySelectorAll("select.status").forEach(sel=>{
     sel.addEventListener("change", async (e)=>{
