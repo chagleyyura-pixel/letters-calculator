@@ -754,6 +754,8 @@ $("heightSlider").addEventListener("input", (e)=>{
 
 function formatMoney(n){ return Math.round(n).toLocaleString("ru-RU"); }
 
+let lastFormattedPrice = "";
+
 function calculate(){
   const rawText = $("signText").value;
   const letterCount = countLetters(rawText);
@@ -793,9 +795,11 @@ function calculate(){
   if(mountIsCustom){
     $("priceValue").textContent = formatMoney(total) + " + монтаж";
     $("priceNote").textContent = "Монтаж выше 5 м считается индивидуально после осмотра объекта.";
+    lastFormattedPrice = formatMoney(total) + " ₽ + монтаж";
   } else {
     $("priceValue").textContent = formatMoney(total);
     $("priceNote").textContent = "Расчёт по прайсу компании. Финальная смета — после замера и уточнения макета.";
+    lastFormattedPrice = formatMoney(total) + " ₽";
   }
 
   $("dimHeightLabel").textContent = "Высота ~ " + height + " см";
@@ -874,6 +878,8 @@ $("resetBtn").addEventListener("click", ()=>{
   buildSeg("classSeg", CONFIG.classes, "cls");
   buildCardGrid("backingGrid", CONFIG.backings, "backing");
   buildCardGrid("mountGrid", CONFIG.mounts, "mount");
+  buildColorSelect("faceColor", CONFIG.faceColors);
+  buildColorSelect("edgeColor", CONFIG.edgeColors);
   $("faceColor").selectedIndex = 0;
   $("edgeColor").selectedIndex = 0;
   renderGlyphs($("signText").value);
@@ -955,7 +961,7 @@ $("submitModal").addEventListener("click", async ()=>{
 
   const payload = {
     name: name, phone: phone, email: email,
-    price: $("priceValue").textContent + " ₽",
+    price: lastFormattedPrice,
     signText: $("signText").value,
     height: $("heightSlider").value + " см",
     type: state.type.label,

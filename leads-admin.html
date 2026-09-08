@@ -156,11 +156,20 @@ async function refreshLeads(){
     const res = await fetch(API_BASE + "/.netlify/functions/get-leads", {
       headers: { "x-admin-password": PASSWORD }
     });
-    if(res.ok){
-      allLeads = await res.json();
-      render();
+    if(res.status === 401){
+      alert("Сессия истекла или пароль изменён. Обновите страницу и войдите заново.");
+      return;
     }
-  } catch(err){ console.error(err); }
+    if(!res.ok){
+      alert("Не удалось обновить список (сервер вернул ошибку). Попробуйте ещё раз.");
+      return;
+    }
+    allLeads = await res.json();
+    render();
+  } catch(err){
+    alert("Не удалось обновить список (нет связи с сервером). Попробуйте ещё раз.");
+    console.error(err);
+  }
 }
 
 async function setDeletedFlag(id, deleted){
@@ -204,8 +213,7 @@ function render(){
   const showDeleted = $("showDeletedToggle").checked;
 
   let leads = allLeads.filter(l=>{
-    if(showDeleted){ if(!l.deleted) return false; }
-    else{ if(l.deleted) return false; }
+    if(!showDeleted && l.deleted) return false;
     if(statusVal !== "all" && l.status !== statusVal) return false;
     if(search){
       const hay = (l.name + " " + l.phone + " " + l.email).toLowerCase();
@@ -324,8 +332,10 @@ function exportCsv(){
   const statusVal = $("statusFilter").value;
   const search = $("searchInput").value.trim().toLowerCase();
   const sortVal = $("sortSelect").value;
+  const showDeleted = $("showDeletedToggle").checked;
 
   let leads = allLeads.filter(l=>{
+    if(!showDeleted && l.deleted) return false;
     if(statusVal !== "all" && l.status !== statusVal) return false;
     if(search){
       const hay = (l.name + " " + l.phone + " " + l.email).toLowerCase();
