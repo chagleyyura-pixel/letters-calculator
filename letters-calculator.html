@@ -6,7 +6,7 @@
 <title>Калькулятор объёмных букв</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@700&family=Pacifico&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@800&family=Playfair+Display:wght@700&family=Pacifico&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#14171c;
@@ -498,7 +498,7 @@ const CONFIG = {
     { val:"day_night",    label:"Буквы день/ночь",                  sub:"от 10 см", minHeight:10, rate:80, depth:60, lit:true,  light:"daynight" },
   ],
   fonts: [
-    { val:"simple", label:"Простой без засечек", mult:1,    family:"'Bebas Neue', sans-serif" },
+    { val:"simple", label:"Простой без засечек", mult:1,    family:"'Manrope', sans-serif", weight:800 },
     { val:"serif",  label:"С засечками",         mult:1.12, family:"'Playfair Display', serif" },
     { val:"script", label:"Рукописный / декоративный", mult:1.3, family:"'Pacifico', cursive" },
   ],
@@ -656,6 +656,7 @@ function countLetters(text){
 function renderGlyphs(text){
   const row = $("glyphRow");
   row.style.fontFamily = state.font.family;
+  row.style.fontWeight = state.font.weight || 400;
   const source = normalizeText(text).length ? normalizeText(text) : "A";
   const chars = source.split("");
   row.innerHTML = "";
