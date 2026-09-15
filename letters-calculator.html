@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Калькулятор объёмных букв</title>
+<title>Калькулятор объёмных вывесок</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@700&family=Golos+Text:wght@400;500;600;700&family=Playfair+Display:wght@700&family=Pacifico&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -38,7 +38,6 @@
   body{ font-family:var(--body); background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; padding:32px 16px; }
   .widget{ max-width:1320px; margin:0 auto; background:linear-gradient(180deg,var(--bg-panel),var(--bg) 70%); border:1px solid var(--line); border-radius:var(--radius-lg); overflow:hidden; }
   .head{ padding:28px 32px 20px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; }
-  .eyebrow{ font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin:0 0 8px; }
   .head h1{ font-family:var(--display); font-weight:400; font-size:34px; letter-spacing:.01em; margin:0; line-height:1.05; }
   .head p{ margin:8px 0 0; color:var(--text-soft); font-size:14px; max-width:520px; }
   .reset-btn{ background:transparent; border:1px solid var(--line); color:var(--text-soft); font-family:var(--body); font-size:13px; padding:9px 16px; border-radius:999px; cursor:pointer; white-space:nowrap; }
@@ -292,9 +291,8 @@
 <div class="widget">
   <div class="head">
     <div>
-      <p class="eyebrow">Расчёт стоимости · объёмные буквы</p>
-      <h1>Калькулятор вывески</h1>
-      <p>Соберите параметры вывески и получите расчёт стоимости. Точная цена — после уточнения по фото объекта.</p>
+      <h1>Калькулятор объёмных вывесок</h1>
+      <p>Выберите параметры — цена посчитается сразу. Точная цена — после уточнения по фото.</p>
     </div>
     <button class="reset-btn" id="resetBtn">Сбросить</button>
   </div>
@@ -425,7 +423,7 @@
       <div class="price-block">
         <div class="price-label">Итого</div>
         <div class="price-value"><span id="priceValue">0</span> ₽</div>
-        <div class="price-note" id="priceNote">Расчёт по прайсу компании. Финальная смета — после замера и уточнения макета.</div>
+        <div class="price-note" id="priceNote">Ориентир по прайсу. Точную цену назовём после замера и макета.</div>
       </div>
 
       <button class="cta" id="openModal">Отправить расчёт</button>
@@ -457,7 +455,7 @@
   <div class="modal">
     <div id="modalForm">
       <h2>Отправить расчёт</h2>
-      <p>Передадим параметры и ориентировочную стоимость менеджеру — уточним детали и пришлём финальную смету.</p>
+      <p>Посмотрим параметры и пришлём точную цену.</p>
       <label for="nameInput">Имя</label>
       <input type="text" id="nameInput" placeholder="Как к вам обращаться">
       <label for="phoneInput">Телефон</label>
@@ -799,7 +797,7 @@ function calculate(){
     lastFormattedPrice = formatMoney(total) + " ₽ + монтаж";
   } else {
     $("priceValue").textContent = formatMoney(total);
-    $("priceNote").textContent = "Расчёт по прайсу компании. Финальная смета — после замера и уточнения макета.";
+    $("priceNote").textContent = "Ориентир по прайсу. Точную цену назовём после замера и макета.";
     lastFormattedPrice = formatMoney(total) + " ₽";
   }
 
