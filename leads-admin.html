@@ -47,6 +47,7 @@
   th{ background:var(--surface); font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-soft); }
   tr:last-child td{ border-bottom:none; }
   .params{ color:var(--text-faint); font-size:11.5px; line-height:1.5; max-width:280px; }
+  .history-note{ color:var(--text-faint); font-size:10.5px; margin-top:4px; cursor:default; }
   .price{ font-family:var(--mono); color:var(--accent); font-weight:600; white-space:nowrap; }
   .contact a{ color:var(--text); text-decoration:none; }
   .contact a:hover{ color:var(--accent); }
@@ -206,6 +207,20 @@ function formatDate(iso){
   return d.toLocaleDateString("ru-RU") + " " + d.toLocaleTimeString("ru-RU", {hour:"2-digit", minute:"2-digit"});
 }
 
+function historyNote(history){
+  if(!Array.isArray(history) || !history.length) return "";
+  const last = history[history.length - 1];
+  const label = last.event === "status"
+    ? `${STATUS_LABELS[last.from] || last.from || "—"} → ${STATUS_LABELS[last.to] || last.to}`
+    : (last.event === "deleted" ? "удалена" : "восстановлена");
+  const tooltip = history.map(h => {
+    const when = formatDate(h.at);
+    const what = h.event === "status" ? `${STATUS_LABELS[h.from] || h.from || "—"} → ${STATUS_LABELS[h.to] || h.to}` : (h.event === "deleted" ? "удалена" : "восстановлена");
+    return `${when}: ${what}`;
+  }).join("\n");
+  return `<div class="history-note" title="${escapeHtml(tooltip)}">${escapeHtml(label)} · ${formatDate(last.at)}</div>`;
+}
+
 function render(){
   const statusVal = $("statusFilter").value;
   const search = $("searchInput").value.trim().toLowerCase();
@@ -279,6 +294,7 @@ function render(){
           <option value="in_progress" ${l.status==="in_progress"?"selected":""}>В работе</option>
           <option value="closed" ${l.status==="closed"?"selected":""}>Закрыта</option>
         </select>
+        ${historyNote(l.history)}
       </td>
       <td>
         ${l.deleted
