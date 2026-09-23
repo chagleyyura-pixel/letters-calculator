@@ -93,10 +93,13 @@
       <option value="price_asc">Цена: сначала дешёвые</option>
     </select>
     <input type="text" id="searchInput" placeholder="Поиск по имени/телефону">
+    <input type="date" id="dateFrom" title="С даты">
+    <input type="date" id="dateTo" title="По дату">
     <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text-soft); cursor:pointer; white-space:nowrap;">
       <input type="checkbox" id="showDeletedToggle" style="accent-color:var(--accent);"> Показать удалённые
     </label>
     <div class="spacer"></div>
+    <button class="refresh-btn" id="clearDateBtn" style="display:none;">✕ Сбросить даты</button>
     <button class="refresh-btn" id="exportBtn">Экспорт CSV</button>
     <button class="refresh-btn" id="refreshBtn">Обновить</button>
   </div>
@@ -201,6 +204,23 @@ $("sortSelect").addEventListener("change", render);
 $("exportBtn").addEventListener("click", exportCsv);
 $("showDeletedToggle").addEventListener("change", render);
 $("searchInput").addEventListener("input", render);
+$("dateFrom").addEventListener("change", render);
+$("dateTo").addEventListener("change", render);
+$("clearDateBtn").addEventListener("click", ()=>{
+  $("dateFrom").value = "";
+  $("dateTo").value = "";
+  render();
+});
+
+function inDateRange(iso){
+  const from = $("dateFrom").value;
+  const to = $("dateTo").value;
+  if(!from && !to) return true;
+  const d = iso.slice(0,10); // YYYY-MM-DD, сравнивается как строка — работает для ISO-дат
+  if(from && d < from) return false;
+  if(to && d > to) return false;
+  return true;
+}
 
 const STATUS_LABELS = { new: "Новая", in_progress: "В работе", closed: "Закрыта" };
 
@@ -229,9 +249,12 @@ function render(){
   const sortVal = $("sortSelect").value;
   const showDeleted = $("showDeletedToggle").checked;
 
+  $("clearDateBtn").style.display = ($("dateFrom").value || $("dateTo").value) ? "" : "none";
+
   let leads = allLeads.filter(l=>{
     if(!showDeleted && l.deleted) return false;
     if(statusVal !== "all" && l.status !== statusVal) return false;
+    if(!inDateRange(l.createdAt)) return false;
     if(search){
       const hay = (l.name + " " + l.phone + " " + l.email).toLowerCase();
       if(!hay.includes(search)) return false;
@@ -355,6 +378,7 @@ function exportCsv(){
   let leads = allLeads.filter(l=>{
     if(!showDeleted && l.deleted) return false;
     if(statusVal !== "all" && l.status !== statusVal) return false;
+    if(!inDateRange(l.createdAt)) return false;
     if(search){
       const hay = (l.name + " " + l.phone + " " + l.email).toLowerCase();
       if(!hay.includes(search)) return false;
