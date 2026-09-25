@@ -42,9 +42,9 @@ export default async (req) => {
     });
   }
 
-  const { id, status, deleted } = body;
-  if (!id || (status === undefined && deleted === undefined)) {
-    return new Response(JSON.stringify({ error: "id and (status or deleted) required" }), {
+  const { id, status, deleted, note } = body;
+  if (!id || (status === undefined && deleted === undefined && note === undefined)) {
+    return new Response(JSON.stringify({ error: "id and (status, deleted or note) required" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
     });
@@ -61,6 +61,12 @@ export default async (req) => {
       headers: { "Content-Type": "application/json" },
     });
   }
+  if (note !== undefined && (typeof note !== "string" || note.length > 500)) {
+    return new Response(JSON.stringify({ error: "note must be a string up to 500 chars" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 
   const store = getStore("leads");
   const lead = await store.get(id, { type: "json" });
@@ -71,8 +77,20 @@ export default async (req) => {
     });
   }
 
-  if (status !== undefined) lead.status = status;
-  if (deleted !== undefined) lead.deleted = deleted;
+  if (!Array.isArray(lead.history)) lead.history = [];
+
+  const now = new Date().toISOString();
+  if (status !== undefined && status !== lead.status) {
+    lead.history.push({ event: "status", from: lead.status, to: status, at: now });
+    lead.status = status;
+  }
+  if (deleted !== undefined && deleted !== lead.deleted) {
+    lead.history.push({ event: deleted ? "deleted" : "restored", at: now });
+    lead.deleted = deleted;
+  }
+  if (note !== undefined) {
+    lead.note = note;
+  }
   await store.setJSON(id, lead);
 
   return new Response(JSON.stringify({ ok: true }), {

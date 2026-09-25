@@ -48,7 +48,18 @@
   .action-btn.restore-btn:hover{ background:rgba(76,195,138,.12); }
   th{ background:var(--surface); font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-soft); }
   tr:last-child td{ border-bottom:none; }
-  .params{ color:var(--text-faint); font-size:11.5px; line-height:1.5; max-width:280px; }
+  .expand-btn{ background:transparent; border:none; color:var(--text-faint); font-size:13px; cursor:pointer; padding:4px 8px; transition:transform .15s ease, color .15s ease; }
+  .expand-btn:hover{ color:var(--accent); }
+  .expand-btn.open{ color:var(--accent); }
+  .detail-row td{ background:var(--surface); padding:14px 20px; }
+  .detail-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px 20px; }
+  .note-block{ margin-top:16px; padding-top:14px; border-top:1px solid var(--line); }
+  .note-text{ width:100%; max-width:520px; min-height:60px; margin-top:6px; background:var(--surface); border:1px solid var(--line); color:var(--text); border-radius:8px; padding:8px 10px; font-family:var(--body); font-size:13px; resize:vertical; display:block; }
+  .note-save-btn{ margin-top:8px; background:transparent; border:1px solid var(--line); color:var(--text-soft); border-radius:6px; padding:6px 12px; font-size:12px; cursor:pointer; }
+  .note-save-btn:hover{ border-color:var(--accent); color:var(--accent); }
+  .note-saved-msg{ margin-left:10px; font-size:12px; color:var(--success); }
+  .detail-label{ display:block; font-family:var(--mono); font-size:10px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.06em; }
+  .detail-val{ display:block; font-size:13px; color:var(--text); margin-top:2px; }
   .history-note{ color:var(--text-faint); font-size:10.5px; margin-top:4px; cursor:default; }
   .price{ font-family:var(--mono); color:var(--accent); font-weight:600; white-space:nowrap; }
   .contact a{ color:var(--text); text-decoration:none; }
@@ -107,10 +118,10 @@
   <table id="leadsTable">
     <thead>
       <tr>
+        <th></th>
         <th>Дата</th>
         <th>Контакт</th>
         <th>Вывеска</th>
-        <th>Параметры</th>
         <th>Цена</th>
         <th>Статус</th>
         <th></th>
@@ -195,6 +206,32 @@ async function setDeletedFlag(id, deleted){
   } catch(err){
     alert("Не удалось изменить заявку (нет связи с сервером). Попробуйте ещё раз.");
     console.error(err);
+  }
+}
+
+async function saveNote(id, note, btn){
+  const msg = document.querySelector(`.note-saved-msg[data-id="${id}"]`);
+  btn.disabled = true;
+  btn.textContent = "Сохраняю…";
+  try{
+    const res = await fetch(API_BASE + "/.netlify/functions/update-lead-status", {
+      method: "POST",
+      headers: { "Content-Type":"application/json", "x-admin-password": PASSWORD },
+      body: JSON.stringify({ id, note })
+    });
+    if(!res.ok){
+      alert("Не удалось сохранить заметку (сервер вернул ошибку). Попробуйте ещё раз.");
+      return;
+    }
+    const lead = allLeads.find(l=>l.id===id);
+    if(lead) lead.note = note;
+    if(msg){ msg.style.display = ""; setTimeout(()=> msg.style.display = "none", 2000); }
+  } catch(err){
+    alert("Не удалось сохранить заметку (нет связи с сервером). Попробуйте ещё раз.");
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Сохранить заметку";
   }
 }
 
@@ -299,7 +336,8 @@ function render(){
   $("leadsTable").style.display = "table";
 
   $("leadsBody").innerHTML = leads.map(l=>`
-    <tr>
+    <tr class="main-row" data-row-id="${l.id}">
+      <td><button type="button" class="expand-btn" data-id="${l.id}" aria-label="Подробнее">▸</button></td>
       <td class="date">${formatDate(l.createdAt)}</td>
       <td class="contact">
         <div><strong>${escapeHtml(l.name)}</strong></div>
@@ -307,11 +345,6 @@ function render(){
         ${l.email ? `<div><a href="mailto:${escapeHtml(l.email)}">${escapeHtml(l.email)}</a></div>` : ""}
       </td>
       <td>${escapeHtml(l.signText || "—")}</td>
-      <td class="params">
-        ${escapeHtml(l.type || "")}${l.height ? ", " + escapeHtml(l.height) : ""}<br>
-        ${escapeHtml(l.font || "")}, ${escapeHtml(l.place || "")}, ${escapeHtml(l.cls || "")}<br>
-        ${escapeHtml(l.backing || "")}, ${escapeHtml(l.mount || "")}
-      </td>
       <td class="price">${escapeHtml(l.price || "—")}</td>
       <td>
         <select class="status" data-status="${l.status}" data-id="${l.id}">
@@ -327,7 +360,48 @@ function render(){
           : `<button class="action-btn delete-btn" data-id="${l.id}">Удалить</button>`}
       </td>
     </tr>
+    <tr class="detail-row" data-detail-for="${l.id}" style="display:none;">
+      <td colspan="7">
+        <div class="detail-grid">
+          <div><span class="detail-label">Тип букв</span><span class="detail-val">${escapeHtml(l.type || "—")}</span></div>
+          <div><span class="detail-label">Высота</span><span class="detail-val">${escapeHtml(l.height || "—")}</span></div>
+          <div><span class="detail-label">Шрифт</span><span class="detail-val">${escapeHtml(l.font || "—")}</span></div>
+          <div><span class="detail-label">Место</span><span class="detail-val">${escapeHtml(l.place || "—")}</span></div>
+          <div><span class="detail-label">Класс исполнения</span><span class="detail-val">${escapeHtml(l.cls || "—")}</span></div>
+          <div><span class="detail-label">Подложка</span><span class="detail-val">${escapeHtml(l.backing || "—")}</span></div>
+          <div><span class="detail-label">Монтаж</span><span class="detail-val">${escapeHtml(l.mount || "—")}</span></div>
+          <div><span class="detail-label">Цвет лица</span><span class="detail-val">${escapeHtml(l.faceColor || "—")}</span></div>
+          <div><span class="detail-label">Цвет борта</span><span class="detail-val">${escapeHtml(l.edgeColor || "—")}</span></div>
+          <div><span class="detail-label">Тонкие элементы</span><span class="detail-val">${l.thinElements ? "да (+25%)" : "нет"}</span></div>
+        </div>
+        <div class="note-block">
+          <span class="detail-label">Заметка</span>
+          <textarea class="note-text" data-id="${l.id}" placeholder="Например: перезвонит в пятницу">${escapeHtml(l.note || "")}</textarea>
+          <button type="button" class="note-save-btn" data-id="${l.id}">Сохранить заметку</button>
+          <span class="note-saved-msg" data-id="${l.id}" style="display:none;">Сохранено</span>
+        </div>
+      </td>
+    </tr>
   `).join("");
+
+  document.querySelectorAll(".expand-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const id = btn.dataset.id;
+      const row = document.querySelector(`.detail-row[data-detail-for="${id}"]`);
+      const isOpen = row.style.display !== "none";
+      row.style.display = isOpen ? "none" : "table-row";
+      btn.textContent = isOpen ? "▸" : "▾";
+      btn.classList.toggle("open", !isOpen);
+    });
+  });
+
+  document.querySelectorAll(".note-save-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const id = btn.dataset.id;
+      const textarea = document.querySelector(`.note-text[data-id="${id}"]`);
+      saveNote(id, textarea.value, btn);
+    });
+  });
 
   document.querySelectorAll(".delete-btn").forEach(btn=>{
     btn.addEventListener("click", async ()=>{
