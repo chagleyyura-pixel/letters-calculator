@@ -528,45 +528,46 @@ ym(112732067,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webv
   </div>
 </div>
 
+<script src="/pricing-core.js"></script>
 <script>
 const CONFIG = {
   letterTypes: [
-    { val:"flat_plain",   label:"Несветовые плоские",              sub:"от 10 см", minHeight:10, rate:80,  depth:5,  lit:false, light:"off" },
-    { val:"flat_volume",  label:"Несветовые объёмные",              sub:"от 10 см", minHeight:10, rate:80,  depth:40, lit:false, light:"volume" },
-    { val:"lit_face",     label:"Световое лицо",                    sub:"от 10 см", minHeight:10, rate:80, depth:60, lit:true,  light:"front" },
-    { val:"lit_face_side",label:"Световой борт и лицо",             sub:"от 16 см", minHeight:16, rate:80, depth:70, lit:true,  light:"front-strong" },
-    { val:"lit_side_only",label:"Лицо не световое, торцы световые", sub:"от 16 см", minHeight:16, rate:80, depth:65, lit:true,  light:"edge" },
-    { val:"halo",         label:"Контражур",                        sub:"от 16 см", minHeight:16, rate:80, depth:60, lit:true,  light:"halo" },
-    { val:"lit_halo",     label:"Световое лицо + контражур",        sub:"от 16 см", minHeight:16, rate:80, depth:70, lit:true,  light:"front-halo" },
-    { val:"rgb",          label:"RGB",                              sub:"от 20 см", minHeight:20, rate:80, depth:70, lit:true,  light:"rgb" },
-    { val:"day_night",    label:"Буквы день/ночь",                  sub:"от 10 см", minHeight:10, rate:80, depth:60, lit:true,  light:"daynight" },
+    { val:"flat_plain",   label:"Несветовые плоские",              sub:"от 10 см", minHeight:10, depth:5,  lit:false, light:"off" },
+    { val:"flat_volume",  label:"Несветовые объёмные",              sub:"от 10 см", minHeight:10, depth:40, lit:false, light:"volume" },
+    { val:"lit_face",     label:"Световое лицо",                    sub:"от 10 см", minHeight:10, depth:60, lit:true,  light:"front" },
+    { val:"lit_face_side",label:"Световой борт и лицо",             sub:"от 16 см", minHeight:16, depth:70, lit:true,  light:"front-strong" },
+    { val:"lit_side_only",label:"Лицо не световое, торцы световые", sub:"от 16 см", minHeight:16, depth:65, lit:true,  light:"edge" },
+    { val:"halo",         label:"Контражур",                        sub:"от 16 см", minHeight:16, depth:60, lit:true,  light:"halo" },
+    { val:"lit_halo",     label:"Световое лицо + контражур",        sub:"от 16 см", minHeight:16, depth:70, lit:true,  light:"front-halo" },
+    { val:"rgb",          label:"RGB",                              sub:"от 20 см", minHeight:20, depth:70, lit:true,  light:"rgb" },
+    { val:"day_night",    label:"Буквы день/ночь",                  sub:"от 10 см", minHeight:10, depth:60, lit:true,  light:"daynight" },
   ],
   fonts: [
-    { val:"simple", label:"Простой без засечек", mult:1,    family:"'Golos Text', sans-serif", weight:700 },
-    { val:"serif",  label:"С засечками",         mult:1.12, family:"'Playfair Display', serif" },
-    { val:"script", label:"Рукописный / декоративный", mult:1.3, family:"'Pacifico', cursive" },
+    { val:"simple", label:"Простой без засечек", family:"'Golos Text', sans-serif", weight:700 },
+    { val:"serif",  label:"С засечками",         family:"'Playfair Display', serif" },
+    { val:"script", label:"Рукописный / декоративный", family:"'Pacifico', cursive" },
   ],
   places: [
-    { val:"interior", label:"Интерьер", mult:0.85 },
-    { val:"street",   label:"Улица",    mult:1.0 },
+    { val:"interior", label:"Интерьер" },
+    { val:"street",   label:"Улица" },
   ],
   classes: [
-    { val:"eco",      label:"Эконом",   mult:0.85, locked:true },
-    { val:"standard", label:"Стандарт", mult:1.0 },
-    { val:"special",  label:"Спец",     mult:1.25, locked:true },
+    { val:"eco",      label:"Эконом",   locked:true },
+    { val:"standard", label:"Стандарт" },
+    { val:"special",  label:"Спец",     locked:true },
   ],
   backings: [
-    { val:"none",        label:"Без подложки",      sub:"без основания", pricePerM2:0,     css:"backing-none" },
-    { val:"pvc",          label:"ПВХ подложка",       sub:"5 000 ₽/м²",  pricePerM2:5000,  css:"backing-pvc" },
-    { val:"composite",    label:"Композитная подложка",sub:"7 500 ₽/м²", pricePerM2:7500,  css:"backing-composite" },
-    { val:"transparent",  label:"Прозрачная подложка", sub:"15 000 ₽/м²",pricePerM2:15000, css:"backing-transparent" },
-    { val:"frame",         label:"Рама",               sub:"1 000 ₽/м²",  pricePerM2:1000, css:"backing-frame" },
+    { val:"none",        label:"Без подложки",      sub:"без основания", css:"backing-none" },
+    { val:"pvc",          label:"ПВХ подложка",       sub:"5 000 ₽/м²",  css:"backing-pvc" },
+    { val:"composite",    label:"Композитная подложка",sub:"7 500 ₽/м²", css:"backing-composite" },
+    { val:"transparent",  label:"Прозрачная подложка", sub:"15 000 ₽/м²",css:"backing-transparent" },
+    { val:"frame",         label:"Рама",               sub:"1 000 ₽/м²",  css:"backing-frame" },
   ],
   mounts: [
-    { val:"none",     label:"Без монтажа",              sub:"без доплаты",       percent:0,    min:0 },
-    { val:"facade3",  label:"Фасадный монтаж до 3 м",   sub:"25% / min 8 000 ₽", percent:0.25, min:8000 },
-    { val:"facade5",  label:"Фасадный монтаж до 5 м",   sub:"30% / min 8 000 ₽", percent:0.30, min:8000 },
-    { val:"custom",   label:"Сложный монтаж / выше 5 м",sub:"индивидуально",     percent:null, min:null },
+    { val:"none",     label:"Без монтажа",              sub:"без доплаты" },
+    { val:"facade3",  label:"Фасадный монтаж до 3 м",   sub:"25% / min 8 000 ₽" },
+    { val:"facade5",  label:"Фасадный монтаж до 5 м",   sub:"30% / min 8 000 ₽" },
+    { val:"custom",   label:"Сложный монтаж / выше 5 м",sub:"индивидуально" },
   ],
   faceColors: [
     { name:"ORACAL 8500 010 White", hex:"#f4f2ec" },
@@ -588,9 +589,6 @@ const CONFIG = {
     { name:"ORACAL 641 Gold Metallic", hex:"#d4af61" },
     { name:"ORACAL 641 034 Orange", hex:"#e2792f" },
   ],
-  charWidthRatio: 0.70,
-  thinElementsSurcharge: 0.25,
-  minOrder: 12000,
   LEADS_WEBHOOK_URL: "/.netlify/functions/submit-lead"
 };
 
@@ -815,25 +813,18 @@ function calculate(){
     warningEl.style.display = "none";
   }
 
-  let unit = height * t.rate * state.font.mult * state.place.mult * state.cls.mult;
-  let lettersSubtotal = unit * letterCount;
-  const thinAddon = state.thin ? lettersSubtotal * CONFIG.thinElementsSurcharge : 0;
-  const lettersTotal = lettersSubtotal + thinAddon;
-
-  const widthCm = letterCount * height * CONFIG.charWidthRatio;
-  const areaM2 = (widthCm/100) * (height/100);
-  const backingCost = areaM2 * state.backing.pricePerM2;
-
-  const preMount = lettersTotal + backingCost;
-
-  let mountCost = 0;
-  let mountIsCustom = state.mount.val === "custom";
-  if(!mountIsCustom && state.mount.percent > 0){
-    mountCost = Math.max(preMount * state.mount.percent, state.mount.min);
+  const r = PricingCore.calcPrice({
+    signText: rawText, heightCm: height,
+    type: t.label, font: state.font.label, place: state.place.label, cls: state.cls.label,
+    backing: state.backing.label, mount: state.mount.label, thin: state.thin
+  });
+  if(!r){
+    $("priceValue").textContent = "—";
+    $("priceNote").textContent = "Не удалось рассчитать цену — напишите нам, посчитаем вручную.";
+    lastFormattedPrice = "";
+    return;
   }
-
-  let total = preMount + mountCost;
-  if(!mountIsCustom) total = Math.max(total, CONFIG.minOrder);
+  const { unit, lettersSubtotal, thinAddon, widthCm, backingCost, backingPricePerM2, mountCost, mountIsCustom, total } = r;
 
   const bpCount = t.lit ? Math.max(1, Math.ceil((widthCm/100)/2)) : 0;
 
@@ -870,7 +861,7 @@ function calculate(){
   if(state.thin){
     rows += "<div class=\"breakdown-row\"><span>Тонкие элементы (+25%)</span><span>" + formatMoney(thinAddon) + " ₽</span></div>";
   }
-  rows += "<div class=\"breakdown-row\"><span>Подложка / основание</span><span>" + (state.backing.pricePerM2 ? formatMoney(backingCost) + " ₽" : "—") + "</span></div>";
+  rows += "<div class=\"breakdown-row\"><span>Подложка / основание</span><span>" + (backingPricePerM2 ? formatMoney(backingCost) + " ₽" : "—") + "</span></div>";
   rows += "<div class=\"breakdown-row\"><span>Монтаж</span><span>" + (mountIsCustom ? "по запросу" : (mountCost ? "+" + formatMoney(mountCost) + " ₽" : "включён")) + "</span></div>";
   rows += "<div class=\"breakdown-row\"><span><strong>Итого</strong></span><span><strong>" + (mountIsCustom ? formatMoney(total) + " + монтаж" : formatMoney(total) + " ₽") + "</strong></span></div>";
   $("breakdown").innerHTML = rows;
