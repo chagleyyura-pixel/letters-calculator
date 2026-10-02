@@ -42,20 +42,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@700&family=Golos+Text:wght@400;500;600;700&family=Playfair+Display:wght@700&family=Pacifico&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#14171c;
-    --bg-panel:#1b1f26;
-    --surface:#20242c;
-    --line:#2b313b;
-    --line-soft:#242932;
-    --text:#f3f1ea;
-    --text-soft:#a9afbb;
-    --text-faint:#6b7280;
-    --accent:#ffb020;
-    --accent-deep:#e0930a;
-    --accent-cool:#7fd9ff;
-    --steel:#3e4654;
-    --success:#4cc38a;
-    --danger:#ff6b6b;
+    --bg:#f7f8fa;
+    --bg-panel:#ffffff;
+    --surface:#edf0f4;
+    --line:#d8dce6;
+    --line-soft:#e8eaef;
+    --text:#1a1e26;
+    --text-soft:#4a5568;
+    --text-faint:#8a93a6;
+    --accent:#d49200;
+    --accent-deep:#b57d00;
+    --accent-cool:#0e7fbf;
+    --steel:#9aa5b4;
+    --success:#2d9e6a;
+    --danger:#d93636;
     --radius-sm:6px;
     --radius:12px;
     --radius-lg:20px;
@@ -203,7 +203,7 @@
   }
   .facade[data-light="front"] .glyph{
     text-shadow:2px 3px 0 #12151a,4px 6px 0 #12151a,5px 7px 10px rgba(0,0,0,.6);
-    filter:drop-shadow(0 0 10px var(--face-color)) drop-shadow(0 0 30px var(--face-color));
+    filter:drop-shadow(0 0 5px var(--face-color)) drop-shadow(0 0 14px var(--face-color));
   }
   .facade[data-light="front-strong"] .glyph{
     text-shadow:2px 3px 0 #12151a,4px 6px 0 #12151a,5px 7px 10px rgba(0,0,0,.6);
@@ -347,7 +347,7 @@ ym(112732067,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webv
 
       <div class="step">
         <div class="step-head"><span class="step-num">01</span><span class="step-title">Текст вывески</span></div>
-        <input type="text" id="signText" placeholder="Например: КОФЕЙНЯ" maxlength="40" value="А-РИАЛ">
+        <input type="text" id="signText" placeholder="Например: КОФЕЙНЯ" maxlength="40" value="Вывеска">
         <div class="step-hint">Кириллица, латиница, цифры и символы. Лишние пробелы калькулятор нормализует автоматически.</div>
       </div>
 
@@ -597,7 +597,7 @@ const state = {
   font: CONFIG.fonts[0],
   place: CONFIG.places[1],
   cls: CONFIG.classes[1],
-  backing: CONFIG.backings[2],
+  backing: CONFIG.backings[4],
   mount: CONFIG.mounts[0],
   thin: false
 };
@@ -897,14 +897,14 @@ $("copyKp").addEventListener("click", ()=>{
 });
 
 $("resetBtn").addEventListener("click", ()=>{
-  $("signText").value = "А-РИАЛ";
+  $("signText").value = "Вывеска";
   $("heightSlider").value = 30;
   $("heightValue").textContent = 30;
   state.type = CONFIG.letterTypes[2];
   state.font = CONFIG.fonts[0];
   state.place = CONFIG.places[1];
   state.cls = CONFIG.classes[1];
-  state.backing = CONFIG.backings[2];
+  state.backing = CONFIG.backings[4];
   state.mount = CONFIG.mounts[0];
   state.thin = false;
   $("thinElements").checked = false;
