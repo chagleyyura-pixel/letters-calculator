@@ -395,6 +395,20 @@
     .lp-reveal{ opacity:1; transform:none; transition:none; }
     .lp-sticky{ transition:none; }
   }
+  .lp-tile{ cursor:zoom-in; }
+  .lp-tile img{ transition:transform .5s ease; }
+  .lp-tile:hover img, .lp-tile:focus-visible img{ transform:scale(1.04); }
+  .lp-hero-photo:hover img{ transform:scale(1.02); }
+  .lp-hero-photo img{ transition:transform .6s ease; }
+  .lb{ position:fixed; inset:0; background:rgba(12,16,15,.92); display:none; align-items:center; justify-content:center; z-index:100; padding:24px; }
+  .lb.is-open{ display:flex; }
+  .lb-img{ max-width:min(1100px,100%); max-height:82vh; border-radius:var(--radius); display:block; }
+  .lb-cap{ position:absolute; left:0; right:0; bottom:18px; text-align:center; color:#e8efed; font-size:15px; }
+  .lb-btn{ position:absolute; top:50%; transform:translateY(-50%); background:rgba(255,255,255,.12); border:0; color:#fff; width:46px; height:46px; border-radius:999px; font-size:22px; cursor:pointer; }
+  .lb-btn:hover{ background:rgba(255,255,255,.22); }
+  .lb-prev{ left:16px; } .lb-next{ right:16px; }
+  .lb-close{ position:absolute; top:16px; right:16px; background:rgba(255,255,255,.12); border:0; color:#fff; width:42px; height:42px; border-radius:999px; font-size:20px; cursor:pointer; }
+  @media (max-width:600px){ .lb-btn{ width:40px; height:40px; } .lb-prev{ left:6px; } .lb-next{ right:6px; } }
   .lp-anchor{ display:block; height:0; }
 
   @media (max-width:860px){
@@ -428,7 +442,7 @@ ym(112732067,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webv
 </head>
 <body>
 
-<header class="lp lp-hero" aria-label="Главная">
+<header class="lp lp-hero lp-reveal" aria-label="Главная">
   <div>
     <p class="lp-eyebrow">ReStil · Производство рекламы</p>
     <h1 class="lp-h1">Объёмные и световые вывески</h1>
@@ -438,7 +452,7 @@ ym(112732067,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webv
       <a class="lp-btn lp-btn-line" href="#works">Смотреть работы</a>
     </div>
   </div>
-  <figure class="lp-hero-photo" style="margin:0;">
+  <figure class="lp-hero-photo" style="margin:0; cursor:zoom-in;" tabindex="0" data-gallery="0">
     <img src="works/hero-wildberries.jpg" alt="Объёмная световая вывеска Wildberries, розовая подсветка" width="1200" height="900">
   </figure>
 </header>
@@ -447,19 +461,19 @@ ym(112732067,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webv
   <h2 class="lp-sec-h" id="works-h">Наши работы</h2>
   <p class="lp-sec-sub">Работы для разных сфер бизнеса</p>
   <div class="lp-bento">
-    <figure class="lp-tile lp-tile-big">
+    <figure class="lp-tile lp-tile-big" tabindex="0" data-gallery="2">
       <img src="works/stomatologiya.jpg" alt="Объёмные световые буквы «Стоматология», белая подсветка" loading="lazy">
       <figcaption>Стоматология<span>Объёмные световые буквы</span></figcaption>
     </figure>
-    <figure class="lp-tile">
+    <figure class="lp-tile" tabindex="0" data-gallery="1">
       <img src="works/wildberries-detail.jpg" alt="Объёмная вывеска Wildberries на фоне стены" loading="lazy">
       <figcaption>Wildberries<span>Объёмные световые буквы</span></figcaption>
     </figure>
-    <figure class="lp-tile">
+    <figure class="lp-tile" tabindex="0" data-gallery="3">
       <img src="works/fruktyi-ovoschi.jpg" alt="Световая вывеска «Фрукты Овощи», зелёная подсветка" loading="lazy">
       <figcaption>Фрукты, овощи<span>Световые буквы, 20 см</span></figcaption>
     </figure>
-    <figure class="lp-tile">
+    <figure class="lp-tile" tabindex="0" data-gallery="4">
       <img src="works/shinomontazh.jpg" alt="Световая вывеска «Шиномонтаж», жёлтая подсветка" loading="lazy">
       <figcaption>Шиномонтаж<span>Световая вывеска</span></figcaption>
     </figure>
@@ -521,7 +535,14 @@ ym(112732067,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webv
 </section>
 
 <nav class="lp-sticky" id="stickyCta" aria-label="Быстрый переход к расчёту"><a href="#calc">Рассчитать стоимость</a></nav>
-<div class="widget">
+<div class="lb" id="lightbox" role="dialog" aria-modal="true" aria-label="Просмотр работ">
+  <button class="lb-close" id="lbClose" aria-label="Закрыть">&times;</button>
+  <button class="lb-btn lb-prev" id="lbPrev" aria-label="Предыдущее фото">&lsaquo;</button>
+  <img class="lb-img" id="lbImg" src="" alt="">
+  <button class="lb-btn lb-next" id="lbNext" aria-label="Следующее фото">&rsaquo;</button>
+  <div class="lb-cap" id="lbCap"></div>
+</div>
+<div class="widget lp-reveal">
   <div class="head">
     <div>
       <h1>Калькулятор объёмных вывесок</h1>
@@ -1313,6 +1334,9 @@ window.addEventListener("resize", ()=>{
 });
 </script>
 <script>
+if("scrollRestoration" in history){ history.scrollRestoration = "manual"; }
+if(location.hash){ history.replaceState(null, "", location.pathname + location.search); }
+window.scrollTo(0, 0);
 (function(){
   function ease(t){ return t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2; }
   document.addEventListener("click", function(e){
@@ -1333,7 +1357,6 @@ window.addEventListener("resize", ()=>{
       if(p < 1) requestAnimationFrame(step);
     }
     requestAnimationFrame(step);
-    history.replaceState(null, "", "#" + id);
   });
 })();
 </script>
@@ -1357,6 +1380,39 @@ window.addEventListener("resize", ()=>{
     }, { threshold: 0 });
     io2.observe(calc);
   }
+})();
+</script>
+<script>
+(function(){
+  var items = [
+    { src: "works/hero-wildberries.jpg", alt: "Объёмная вывеска Wildberries, розовая подсветка", cap: "Wildberries, объёмные световые буквы" },
+    { src: "works/wildberries-detail.jpg", alt: "Вывеска Wildberries на фоне стены", cap: "Wildberries, крупный план" },
+    { src: "works/stomatologiya.jpg", alt: "Буквы «Стоматология», белая подсветка", cap: "Стоматология, объёмные световые буквы" },
+    { src: "works/fruktyi-ovoschi.jpg", alt: "Вывеска «Фрукты Овощи», зелёная подсветка", cap: "Фрукты, овощи, световые буквы" },
+    { src: "works/shinomontazh.jpg", alt: "Вывеска «Шиномонтаж», жёлтая подсветка", cap: "Шиномонтаж, световая вывеска" }
+  ];
+  var box = document.getElementById("lightbox"), img = document.getElementById("lbImg"), cap = document.getElementById("lbCap");
+  var cur = 0, lastFocus = null;
+  function show(i){ cur = (i + items.length) % items.length; img.src = items[cur].src; img.alt = items[cur].alt; cap.textContent = items[cur].cap + "  ·  " + (cur+1) + " из " + items.length; }
+  function open(i){ lastFocus = document.activeElement; show(i); box.classList.add("is-open"); document.body.style.overflow = "hidden"; document.getElementById("lbClose").focus(); }
+  function close(){ box.classList.remove("is-open"); document.body.style.overflow = ""; if(lastFocus) lastFocus.focus(); }
+  document.querySelectorAll("[data-gallery]").forEach(function(el){
+    el.addEventListener("click", function(){ open(Number(el.getAttribute("data-gallery"))); });
+    el.addEventListener("keydown", function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); open(Number(el.getAttribute("data-gallery"))); } });
+  });
+  document.getElementById("lbClose").addEventListener("click", close);
+  document.getElementById("lbPrev").addEventListener("click", function(){ show(cur-1); });
+  document.getElementById("lbNext").addEventListener("click", function(){ show(cur+1); });
+  box.addEventListener("click", function(e){ if(e.target === box) close(); });
+  document.addEventListener("keydown", function(e){
+    if(!box.classList.contains("is-open")) return;
+    if(e.key === "Escape") close();
+    if(e.key === "ArrowLeft") show(cur-1);
+    if(e.key === "ArrowRight") show(cur+1);
+  });
+  var tx = null;
+  box.addEventListener("touchstart", function(e){ tx = e.touches[0].clientX; }, { passive: true });
+  box.addEventListener("touchend", function(e){ if(tx === null) return; var dx = e.changedTouches[0].clientX - tx; if(Math.abs(dx) > 50){ show(cur + (dx < 0 ? 1 : -1)); } tx = null; });
 })();
 </script>
 </body>
