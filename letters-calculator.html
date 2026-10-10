@@ -334,6 +334,57 @@
     .card-grid{ grid-template-columns:1fr; }
     body{ padding:10px 6px; }
   }
+  /* ---------- Главная: витрина, работы, отзывы (lp-) ---------- */
+  .lp{ max-width:1320px; margin:0 auto 28px; font-family:var(--body); color:var(--text); }
+  .lp-hero{ display:grid; grid-template-columns:1.05fr 1fr; gap:36px; align-items:center; padding:24px 6px 36px; }
+  .lp-eyebrow{ font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-deep); margin:0 0 12px; font-weight:600; }
+  .lp-h1{ font-family:var(--display); font-weight:700; font-size:44px; line-height:1.12; margin:0 0 16px; letter-spacing:-.01em; }
+  .lp-lead{ font-size:17px; line-height:1.6; color:var(--text-soft); margin:0 0 26px; max-width:520px; }
+  .lp-btns{ display:flex; gap:10px; flex-wrap:wrap; }
+  .lp-btn{ display:inline-block; text-decoration:none; font-size:15px; font-weight:600; padding:13px 22px; border-radius:var(--radius-sm); border:1px solid transparent; }
+  .lp-btn-main{ background:var(--accent); color:#1a1300; }
+  .lp-btn-main:hover{ background:var(--accent-deep); color:#fff; }
+  .lp-btn-line{ border-color:var(--line); color:var(--text); background:transparent; }
+  .lp-btn-line:hover{ border-color:var(--steel); }
+  .lp-hero-photo{ border-radius:var(--radius-lg); overflow:hidden; aspect-ratio:4/3; background:var(--surface); }
+  .lp-hero-photo img, .lp-tile img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+  .lp-sec{ padding:28px 6px 8px; }
+  .lp-sec-h{ font-family:var(--display); font-weight:700; font-size:28px; margin:0 0 6px; }
+  .lp-sec-sub{ font-size:15px; color:var(--text-soft); margin:0 0 22px; }
+
+  .lp-bento{ display:grid; grid-template-columns:1.5fr 1fr 1fr; grid-auto-rows:minmax(200px, auto); gap:14px; }
+  .lp-tile{ position:relative; border-radius:var(--radius); overflow:hidden; background:var(--surface); margin:0; }
+  .lp-tile-big{ grid-row:span 2; }
+  .lp-tile figcaption{ position:absolute; left:0; right:0; bottom:0; padding:28px 16px 14px; background:linear-gradient(transparent, rgba(10,12,15,.78)); color:#fff; font-size:15px; font-weight:600; }
+  .lp-tile figcaption span{ display:block; font-size:13px; font-weight:400; opacity:.9; margin-top:2px; }
+
+  .lp-reviews{ display:grid; grid-template-columns:1fr 1fr; gap:0 36px; }
+  .lp-rev{ border-top:1px solid var(--line); padding:20px 0 22px; }
+  .lp-rev-text{ font-size:16px; line-height:1.6; color:var(--text); margin:0 0 10px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .lp-rev-who{ font-size:13px; color:var(--text-faint); }
+  .lp-rev-who b{ color:var(--text-soft); font-weight:600; }
+
+  .lp-cta{ margin:26px 6px 0; padding:22px 24px; border:1px solid var(--line); border-radius:var(--radius-lg); background:var(--bg-panel); display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .lp-cta p{ margin:0; font-size:16px; }
+  .lp-cta strong{ font-family:var(--display); font-size:20px; display:block; margin-bottom:4px; }
+
+  .lp-anchor{ display:block; height:0; }
+
+  @media (max-width:860px){
+    .lp-hero{ grid-template-columns:1fr; gap:22px; padding:12px 4px 24px; }
+    .lp-h1{ font-size:32px; }
+    .lp-bento{ grid-template-columns:1fr 1fr; }
+    .lp-tile-big{ grid-column:span 2; grid-row:auto; }
+    .lp-reviews{ grid-template-columns:1fr; }
+  }
+  @media (max-width:520px){
+    .lp-h1{ font-size:27px; }
+    .lp-lead{ font-size:15px; }
+    .lp-bento{ grid-template-columns:1fr; }
+    .lp-tile-big{ grid-column:auto; }
+    .lp-cta{ padding:18px; }
+  }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -350,6 +401,75 @@ ym(112732067,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webv
 <!-- /Yandex.Metrika counter -->
 </head>
 <body>
+
+<header class="lp lp-hero" aria-label="Главная">
+  <div>
+    <p class="lp-eyebrow">ReStil · Производство рекламы</p>
+    <h1 class="lp-h1">Объёмные и световые вывески, которые видно издалека</h1>
+    <p class="lp-lead">Выберите тип букв, высоту и монтаж. Цена посчитается сразу. Точную стоимость назовём после замера и макета.</p>
+    <div class="lp-btns">
+      <a class="lp-btn lp-btn-main" href="#calc">Рассчитать стоимость</a>
+      <a class="lp-btn lp-btn-line" href="#works">Смотреть работы</a>
+    </div>
+  </div>
+  <figure class="lp-hero-photo" style="margin:0;">
+    <img src="works/hero-wildberries.jpg" alt="Объёмная световая вывеска Wildberries, розовая подсветка" width="1200" height="900">
+  </figure>
+</header>
+
+<section class="lp lp-sec" id="works" aria-labelledby="works-h">
+  <h2 class="lp-sec-h" id="works-h">Наши работы</h2>
+  <p class="lp-sec-sub">Вывески для разных бизнесов: объёмные буквы, световые и подсвеченные</p>
+  <div class="lp-bento">
+    <figure class="lp-tile lp-tile-big">
+      <img src="works/stomatologiya.jpg" alt="Объёмные световые буквы «Стоматология», белая подсветка" loading="lazy">
+      <figcaption>Стоматология<span>Объёмные световые буквы</span></figcaption>
+    </figure>
+    <figure class="lp-tile">
+      <img src="works/wildberries-detail.jpg" alt="Объёмная вывеска Wildberries на фоне стены" loading="lazy">
+      <figcaption>Wildberries<span>Объёмные световые буквы</span></figcaption>
+    </figure>
+    <figure class="lp-tile">
+      <img src="works/fruktyi-ovoschi.jpg" alt="Световая вывеска «Фрукты Овощи», зелёная подсветка" loading="lazy">
+      <figcaption>Фрукты, овощи<span>Световые буквы, 20 см</span></figcaption>
+    </figure>
+    <figure class="lp-tile">
+      <img src="works/shinomontazh.jpg" alt="Световая вывеска «Шиномонтаж», жёлтая подсветка" loading="lazy">
+      <figcaption>Шиномонтаж<span>Световая вывеска</span></figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="lp lp-sec" aria-labelledby="rev-h">
+  <h2 class="lp-sec-h" id="rev-h">Что говорят клиенты</h2>
+  <p class="lp-sec-sub">Отзывы с Авито. Длинные отзывы сокращены.</p>
+  <div class="lp-reviews">
+    <div class="lp-rev">
+      <p class="lp-rev-text">«Сделка прошла отлично, Станислав ответил на все возникшие вопросы в переписке.»</p>
+      <p class="lp-rev-who"><b>Дмитрий</b>, покупатель, 2 августа</p>
+    </div>
+    <div class="lp-rev">
+      <p class="lp-rev-text">«Всё отлично, как договаривались, никаких доп сумм.»</p>
+      <p class="lp-rev-who"><b>Эльвира</b>, покупатель, 11 ноября 2025</p>
+    </div>
+    <div class="lp-rev">
+      <p class="lp-rev-text">«Компания клиентоориентированная, в случае вопросов предлагают быстрое решение.»</p>
+      <p class="lp-rev-who"><b>Никита А.</b>, покупатель, 10 января 2024</p>
+    </div>
+    <div class="lp-rev">
+      <p class="lp-rev-text">«Благодарю продавца, такую быструю работу. Вывеска пришла целая, рабочая.»</p>
+      <p class="lp-rev-who"><b>Мария</b>, покупатель, 7 декабря 2022</p>
+    </div>
+  </div>
+</section>
+
+<section class="lp" aria-labelledby="calc-h">
+  <span class="lp-anchor" id="calc"></span>
+  <div class="lp-cta">
+    <p><strong id="calc-h">Посчитайте свою вывеску</strong>Ниже калькулятор. Введите текст и параметры, цена меняется сразу.</p>
+    <a class="lp-btn lp-btn-main" href="#calc">Перейти к расчёту</a>
+  </div>
+</section>
 
 <div class="widget">
   <div class="head">
