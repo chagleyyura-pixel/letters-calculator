@@ -316,6 +316,24 @@
 
     .mount-indicator{ flex-wrap:wrap; }
   }
+  /* ---------- Исправления для телефонов (добавлено) ---------- */
+  .layout > *, .form, .side { min-width:0; max-width:100%; }
+  .card-grid, .card-grid.cols-2 { min-width:0; }
+  .opt-card { min-width:0; word-break:break-word; }
+  .facade { min-width:0; max-width:100%; overflow:hidden; }
+  .glyph-row { max-width:100%; }
+  .tags, .mount-indicator { max-width:100%; }
+  @media (max-width:600px){
+    .card-grid{ grid-template-columns:1fr; }
+    .card-grid.cols-2{ grid-template-columns:1fr; }
+    .head h1{ font-size:24px; }
+    .facade{ min-height:150px; padding:40px 14px 32px 22px; }
+    .price-value{ font-size:26px; }
+  }
+  @media (max-width:380px){
+    .card-grid{ grid-template-columns:1fr; }
+    body{ padding:10px 6px; }
+  }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -474,7 +492,7 @@ ym(112732067,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webv
       <button class="cta" id="openModal">Отправить расчёт</button>
       <button class="btn-ghost" id="downloadPng" style="width:100%; margin-top:8px;">⬇ Скачать эскиз (PNG)</button>
       <button class="btn-ghost" id="downloadPdf" style="width:100%; margin-top:8px;">⬇ Скачать расчёт (PDF)</button>
-      <div class="disclaimer">Заявка сохранится в нашей системе, менеджер свяжется с вами по указанному телефону.</div>
+      <div class="disclaimer">Менеджер свяжется с вами по указанному телефону в течение 1–2 рабочих дней.</div>
 
       <details class="accordion" open>
         <summary>Детали расчёта</summary>
@@ -522,7 +540,7 @@ ym(112732067,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webv
     <div id="modalSuccess" class="success-state" style="display:none;">
       <div class="mark">✓</div>
       <h2>Заявка отправлена</h2>
-      <p>Мы свяжемся с вами в ближайшее время.</p>
+      <p>Менеджер свяжется с вами в течение 1–2 рабочих дней.</p>
       <button class="btn-ghost" id="closeSuccess" style="width:100%;">Готово</button>
     </div>
   </div>

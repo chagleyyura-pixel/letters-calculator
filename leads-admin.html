@@ -72,6 +72,13 @@
   select.status[data-status="closed"]{ border-color:var(--success); color:var(--success); }
 
   .empty{ text-align:center; padding:60px 20px; color:var(--text-faint); }
+  .pagination{ display:flex; align-items:center; justify-content:space-between; padding:14px 0 4px; gap:12px; flex-wrap:wrap; }
+  .pagination-info{ font-family:var(--mono); font-size:12px; color:var(--text-faint); }
+  .pagination-btns{ display:flex; gap:6px; flex-wrap:wrap; }
+  .page-btn{ font-family:var(--mono); font-size:12px; background:var(--surface); border:1px solid var(--line); color:var(--text-soft); border-radius:6px; padding:5px 11px; cursor:pointer; }
+  .page-btn:hover{ border-color:var(--steel); color:var(--text); }
+  .page-btn.active{ background:rgba(255,176,32,.12); border-color:var(--accent); color:var(--accent); }
+  .page-btn:disabled{ opacity:.4; cursor:not-allowed; }
 </style>
 </head>
 <body>
@@ -129,6 +136,10 @@
     </thead>
     <tbody id="leadsBody"></tbody>
   </table>
+  <div class="pagination" id="pagination" style="display:none;">
+    <div class="pagination-info" id="paginationInfo"></div>
+    <div class="pagination-btns" id="paginationBtns"></div>
+  </div>
   <div class="empty" id="emptyState" style="display:none;">Заявок пока нет</div>
 </div>
 
@@ -235,14 +246,15 @@ async function saveNote(id, note, btn){
   }
 }
 
+function resetPageAndRender(){ currentPage = 1; render(); }
 $("refreshBtn").addEventListener("click", refreshLeads);
-$("statusFilter").addEventListener("change", render);
-$("sortSelect").addEventListener("change", render);
+$("statusFilter").addEventListener("change", resetPageAndRender);
+$("sortSelect").addEventListener("change", resetPageAndRender);
 $("exportBtn").addEventListener("click", exportCsv);
-$("showDeletedToggle").addEventListener("change", render);
-$("searchInput").addEventListener("input", render);
-$("dateFrom").addEventListener("change", render);
-$("dateTo").addEventListener("change", render);
+$("showDeletedToggle").addEventListener("change", resetPageAndRender);
+$("searchInput").addEventListener("input", resetPageAndRender);
+$("dateFrom").addEventListener("change", resetPageAndRender);
+$("dateTo").addEventListener("change", resetPageAndRender);
 $("clearDateBtn").addEventListener("click", ()=>{
   $("dateFrom").value = "";
   $("dateTo").value = "";
@@ -260,6 +272,8 @@ function inDateRange(iso){
 }
 
 const STATUS_LABELS = { new: "Новая", in_progress: "В работе", closed: "Закрыта" };
+const PAGE_SIZE = 25;
+let currentPage = 1;
 
 function formatDate(iso){
   const d = new Date(iso);
@@ -330,12 +344,51 @@ function render(){
     $("leadsBody").innerHTML = "";
     $("emptyState").style.display = "block";
     $("leadsTable").style.display = "none";
+    $("pagination").style.display = "none";
     return;
   }
   $("emptyState").style.display = "none";
   $("leadsTable").style.display = "table";
 
-  $("leadsBody").innerHTML = leads.map(l=>`
+  // Пагинация
+  const totalPages = Math.max(1, Math.ceil(leads.length / PAGE_SIZE));
+  if(currentPage > totalPages) currentPage = totalPages;
+  const pageLeads = leads.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+
+  // Блок пагинации
+  const pag = $("pagination");
+  if(totalPages > 1){
+    pag.style.display = "flex";
+    $("paginationInfo").textContent = `Страница ${currentPage} из ${totalPages} · всего ${leads.length} заявок`;
+    const btns = $("paginationBtns");
+    btns.innerHTML = "";
+    const prev = document.createElement("button");
+    prev.className = "page-btn"; prev.textContent = "← Назад";
+    prev.disabled = currentPage === 1;
+    prev.addEventListener("click", ()=>{ currentPage--; render(); window.scrollTo(0,0); });
+    btns.appendChild(prev);
+    const maxVisible = 5;
+    let start = Math.max(1, currentPage - Math.floor(maxVisible/2));
+    let end = Math.min(totalPages, start + maxVisible - 1);
+    if(end - start < maxVisible - 1) start = Math.max(1, end - maxVisible + 1);
+    for(let p = start; p <= end; p++){
+      const pb = document.createElement("button");
+      pb.className = "page-btn" + (p === currentPage ? " active" : "");
+      pb.textContent = p;
+      const page = p;
+      pb.addEventListener("click", ()=>{ currentPage = page; render(); window.scrollTo(0,0); });
+      btns.appendChild(pb);
+    }
+    const next = document.createElement("button");
+    next.className = "page-btn"; next.textContent = "Вперёд →";
+    next.disabled = currentPage === totalPages;
+    next.addEventListener("click", ()=>{ currentPage++; render(); window.scrollTo(0,0); });
+    btns.appendChild(next);
+  } else {
+    pag.style.display = "none";
+  }
+
+  $("leadsBody").innerHTML = pageLeads.map(l=>`
     <tr class="main-row" data-row-id="${l.id}">
       <td><button type="button" class="expand-btn" data-id="${l.id}" aria-label="Подробнее">▸</button></td>
       <td class="date">${formatDate(l.createdAt)}</td>
