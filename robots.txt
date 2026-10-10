@@ -2,4 +2,4 @@ User-agent: *
 Disallow: /leads-admin.html
 Allow: /
 
-Sitemap: https://mellifluous-gecko-4dc5ef.netlify.app/sitemap.xml
+Sitemap: https://letter-calculator.netlify.app/sitemap.xml
