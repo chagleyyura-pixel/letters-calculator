@@ -369,6 +369,14 @@
   .lp-cta p{ margin:0; font-size:16px; }
   .lp-cta strong{ font-family:var(--display); font-size:20px; display:block; margin-bottom:4px; }
 
+  .lp-src-row{ display:flex; align-items:baseline; justify-content:space-between; margin:8px 0 4px; }
+  .lp-src{ font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:#0e8a8a; font-weight:600; }
+  .lp-src-link{ font-size:14px; color:var(--text-soft); text-decoration:underline; text-underline-offset:3px; }
+  .lp-reviews-one{ grid-template-columns:1fr; max-width:560px; }
+  .lp-map{ border-radius:var(--radius-lg); overflow:hidden; border:1px solid var(--line); background:var(--surface); }
+  .lp-map iframe{ display:block; border:0; }
+  .lp-map-link{ margin:12px 0 0; font-size:15px; }
+  .lp-map-link a{ color:#0e8a8a; font-weight:600; }
   .lp-anchor{ display:block; height:0; }
 
   @media (max-width:860px){
@@ -442,7 +450,21 @@ ym(112732067,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webv
 
 <section class="lp lp-sec" aria-labelledby="rev-h">
   <h2 class="lp-sec-h" id="rev-h">Что говорят клиенты</h2>
-  <p class="lp-sec-sub">Отзывы с Авито. Длинные отзывы сокращены.</p>
+  <p class="lp-sec-sub">Отзывы с Яндекс Карт и Авито. Длинные отзывы сокращены.</p>
+  <div class="lp-src-row">
+    <span class="lp-src">Яндекс Карты</span>
+    <a class="lp-src-link" href="https://yandex.ru/maps/org/129553472479" target="_blank" rel="noopener">Все отзывы</a>
+  </div>
+  <div class="lp-reviews lp-reviews-one">
+    <div class="lp-rev">
+      <p class="lp-rev-text">«Отличная мастерская по производству вывесок. Качественно, недорого, толковый и вежливый персонал. Удобно добраться.»</p>
+      <p class="lp-rev-who"><b>Вернер Хольт</b>, 21 мая, 5 из 5</p>
+    </div>
+  </div>
+  <div class="lp-src-row">
+    <span class="lp-src">Авито</span>
+    <a class="lp-src-link" href="https://www.avito.ru/brands/i75827714" target="_blank" rel="noopener">Все отзывы</a>
+  </div>
   <div class="lp-reviews">
     <div class="lp-rev">
       <p class="lp-rev-text">«Сделка прошла отлично, Станислав ответил на все возникшие вопросы в переписке.»</p>
@@ -461,6 +483,15 @@ ym(112732067,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webv
       <p class="lp-rev-who"><b>Мария</b>, покупатель, 7 декабря 2022</p>
     </div>
   </div>
+</section>
+
+<section class="lp lp-sec" id="contacts" aria-labelledby="contacts-h">
+  <h2 class="lp-sec-h" id="contacts-h">Как нас найти</h2>
+  <p class="lp-sec-sub">Москва, улица Кедрова, 11А, стр. 1</p>
+  <div class="lp-map">
+    <iframe src="https://yandex.ru/map-widget/v1/?ll=37.574826%2C55.684649&z=16&pt=37.574826%2C55.684649%2Cpm2rdm" width="100%" height="360" frameborder="0" title="Карта: ReStil, Москва, улица Кедрова, 11А" loading="lazy"></iframe>
+  </div>
+  <p class="lp-map-link"><a href="https://yandex.ru/maps/org/129553472479" target="_blank" rel="noopener">Построить маршрут в Яндекс Картах</a></p>
 </section>
 
 <section class="lp" aria-labelledby="calc-h">
