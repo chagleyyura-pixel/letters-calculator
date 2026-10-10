@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0e8a8a">
 <meta name="google-site-verification" content="iwGq_j3CsL2-FPXJ-bYnFyZNRsVkqGEw-iEK9CRnb1w">
 <title>Калькулятор объёмных вывесок — ReStil</title>
 <link rel="icon" href="/favicon.ico" sizes="any">
@@ -377,6 +378,23 @@
   .lp-map iframe{ display:block; border:0; }
   .lp-map-link{ margin:12px 0 0; font-size:15px; }
   .lp-map-link a{ color:#0e8a8a; font-weight:600; }
+  /* ---------- Мелкие детали: фокус, появление, липкая кнопка ---------- */
+  .lp-btn:focus-visible, .lp-src-link:focus-visible, .lp-map-link a:focus-visible, .lp-sticky a:focus-visible{ outline:2px solid #0e8a8a; outline-offset:3px; }
+  .lp-hero-photo img, .lp-tile img{ aspect-ratio:4/3; }
+  .lp-tile-big img{ aspect-ratio:auto; }
+  .lp-reveal{ opacity:0; transform:translateY(14px); transition:opacity .7s ease, transform .7s ease; }
+  .lp-reveal.is-in{ opacity:1; transform:none; }
+  .lp-sticky{ display:none; }
+  @media (max-width:860px){
+    .lp-sticky{ display:flex; position:fixed; left:0; right:0; bottom:0; z-index:40; padding:10px 14px calc(10px + env(safe-area-inset-bottom, 0px)); background:rgba(255,255,255,.96); border-top:1px solid var(--line); transform:translateY(0); transition:transform .35s ease; }
+    .lp-sticky.is-hidden{ transform:translateY(110%); }
+    .lp-sticky a{ flex:1; text-align:center; background:#0e8a8a; color:#fff; text-decoration:none; font-weight:600; font-size:16px; padding:14px; border-radius:var(--radius-sm); }
+    body{ padding-bottom:84px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .lp-reveal{ opacity:1; transform:none; transition:none; }
+    .lp-sticky{ transition:none; }
+  }
   .lp-anchor{ display:block; height:0; }
 
   @media (max-width:860px){
@@ -425,7 +443,7 @@ ym(112732067,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webv
   </figure>
 </header>
 
-<section class="lp lp-sec" id="works" aria-labelledby="works-h">
+<section class="lp lp-sec lp-reveal" id="works" aria-labelledby="works-h">
   <h2 class="lp-sec-h" id="works-h">Наши работы</h2>
   <p class="lp-sec-sub">Работы для разных сфер бизнеса</p>
   <div class="lp-bento">
@@ -448,7 +466,7 @@ ym(112732067,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webv
   </div>
 </section>
 
-<section class="lp lp-sec" aria-labelledby="rev-h">
+<section class="lp lp-sec lp-reveal" aria-labelledby="rev-h">
   <h2 class="lp-sec-h" id="rev-h">Что говорят клиенты</h2>
   <p class="lp-sec-sub">Отзывы с Яндекс Карт и Авито. Длинные отзывы сокращены.</p>
   <div class="lp-src-row">
@@ -485,7 +503,7 @@ ym(112732067,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webv
   </div>
 </section>
 
-<section class="lp lp-sec" id="contacts" aria-labelledby="contacts-h">
+<section class="lp lp-sec lp-reveal" id="contacts" aria-labelledby="contacts-h">
   <h2 class="lp-sec-h" id="contacts-h">Как нас найти</h2>
   <p class="lp-sec-sub">Москва, улица Кедрова, 11А, стр. 1</p>
   <div class="lp-map">
@@ -502,6 +520,7 @@ ym(112732067,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webv
   </div>
 </section>
 
+<nav class="lp-sticky" id="stickyCta" aria-label="Быстрый переход к расчёту"><a href="#calc">Рассчитать стоимость</a></nav>
 <div class="widget">
   <div class="head">
     <div>
@@ -1316,6 +1335,28 @@ window.addEventListener("resize", ()=>{
     requestAnimationFrame(step);
     history.replaceState(null, "", "#" + id);
   });
+})();
+</script>
+<script>
+(function(){
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var reveals = document.querySelectorAll(".lp-reveal");
+  if("IntersectionObserver" in window && !reduce){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add("is-in"); io.unobserve(en.target); } });
+    }, { threshold: 0.12 });
+    reveals.forEach(function(el){ io.observe(el); });
+  } else {
+    reveals.forEach(function(el){ el.classList.add("is-in"); });
+  }
+  var sticky = document.getElementById("stickyCta");
+  var calc = document.querySelector(".widget");
+  if(sticky && calc && "IntersectionObserver" in window){
+    var io2 = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ sticky.classList.toggle("is-hidden", en.isIntersecting); });
+    }, { threshold: 0 });
+    io2.observe(calc);
+  }
 })();
 </script>
 </body>
