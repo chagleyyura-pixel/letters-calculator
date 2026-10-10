@@ -1233,18 +1233,22 @@ $("submitModal").addEventListener("click", async ()=>{
 
   try{
     if(CONFIG.LEADS_WEBHOOK_URL){
-      await fetch(CONFIG.LEADS_WEBHOOK_URL, {
+      const res = await fetch(CONFIG.LEADS_WEBHOOK_URL, {
         method:"POST",
         headers:{ "Content-Type":"application/json" },
         body: JSON.stringify(payload)
       });
+      const resData = await res.json().catch(()=>({}));
+      if(!res.ok){
+        throw new Error(resData.error || ("Сервер ответил ошибкой " + res.status));
+      }
     } else {
       console.log("Заявка (webhook не настроен):", payload);
     }
     $("modalForm").style.display = "none";
     $("modalSuccess").style.display = "block";
   } catch(err){
-    $("formError").textContent = "Не удалось отправить заявку, попробуйте ещё раз";
+    $("formError").textContent = "Не удалось отправить заявку: " + err.message;
     console.error(err);
   }
 });
