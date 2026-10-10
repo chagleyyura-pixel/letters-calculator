@@ -44,3 +44,20 @@ export async function clearAttempts(ip) {
     // не критично
   }
 }
+
+// Единая проверка пароля админки для всех функций.
+// Возвращает null, если пароль верный, иначе готовый Response с понятной ошибкой.
+export function checkAdminAccess(req, ip) {
+  const expected = (Netlify.env.get("ADMIN_PASSWORD") || "").trim();
+  if (!expected) {
+    return new Response(JSON.stringify({ error: "Админка не настроена: в Netlify не задана переменная ADMIN_PASSWORD." }), {
+      status: 503,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  const password = (req.headers.get("x-admin-password") || "").trim();
+  if (password !== expected) {
+    return { wrongPassword: true };
+  }
+  return null;
+}

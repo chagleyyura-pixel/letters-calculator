@@ -164,11 +164,20 @@ async function tryLogin(){
       $("pwError").textContent = "Неверный пароль";
       return;
     }
-    if(!res.ok){
-      $("pwError").textContent = "Ошибка сервера, попробуйте позже";
+    if(res.status === 429){
+      $("pwError").textContent = "Слишком много неверных попыток. Подождите 5 минут и попробуйте снова.";
       return;
     }
-    PASSWORD = pw;
+    if(res.status === 503){
+      const body = await res.json().catch(()=>({}));
+      $("pwError").textContent = body.error || "Админка не настроена на сервере.";
+      return;
+    }
+    if(!res.ok){
+      $("pwError").textContent = "Ошибка сервера (код " + res.status + "). Попробуйте позже.";
+      return;
+    }
+    PASSWORD = pw.trim();
     allLeads = await res.json();
     $("gateScreen").style.display = "none";
     $("app").style.display = "block";

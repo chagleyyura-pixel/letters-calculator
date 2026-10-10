@@ -1,5 +1,5 @@
 import { getStore } from "@netlify/blobs";
-import { getClientIp, isLockedOut, recordFailedAttempt, clearAttempts } from "./_login-guard.mjs";
+import { getClientIp, isLockedOut, recordFailedAttempt, clearAttempts, checkAdminAccess } from "./_login-guard.mjs";
 
 export default async (req) => {
   const ip = getClientIp(req);
@@ -11,10 +11,9 @@ export default async (req) => {
     });
   }
 
-  const password = req.headers.get("x-admin-password") || "";
-  const expected = Netlify.env.get("ADMIN_PASSWORD") || "";
-
-  if (!expected || password !== expected) {
+  const check = checkAdminAccess(req, ip);
+  if (check instanceof Response) return check;
+  if (check && check.wrongPassword) {
     await recordFailedAttempt(ip);
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
