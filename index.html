@@ -426,6 +426,30 @@
     .lp-tile-big{ grid-column:auto; }
     .lp-cta{ padding:18px; }
   }
+  .sign3d-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; }
+  .sign3d-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
+  .sign3d-card-head{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px 10px; }
+  .sign3d-name{ font-family:var(--body); font-weight:600; font-size:14px; color:var(--text); }
+  .sign3d-tabs{ display:flex; gap:6px; }
+  .sign3d-tab{ font-family:var(--body); font-size:12px; color:var(--text-soft); background:var(--bg-panel); border:1px solid var(--line); border-radius:999px; padding:5px 11px; cursor:pointer; }
+  .sign3d-tab.active{ background:rgba(14,138,138,.12); border-color:var(--accent); color:var(--accent); }
+  .sign3d-view{ position:relative; height:190px; }
+  .sign3d-photo{ width:100%; height:100%; object-fit:cover; display:none; }
+  .sign3d-photo.active{ display:block; }
+  .sign3d-stage{ display:none; width:100%; height:100%; perspective:900px; cursor:grab; touch-action:none;
+    user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent; }
+  .sign3d-stage.active{ display:block; }
+  .sign3d-stage:active{ cursor:grabbing; }
+  .sign3d-word{ position:relative; width:100%; height:100%; transform-style:preserve-3d; user-select:none; }
+  .sign3d-layer{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-weight:800;
+    font-size:32px; letter-spacing:1.5px; white-space:nowrap; font-family:var(--body);
+    user-select:none; pointer-events:none; }
+  .sign3d-sweep{ position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen;
+    background:linear-gradient(115deg, rgba(255,255,255,0) 32%, rgba(255,255,255,.22) 48%, rgba(255,255,255,0) 64%);
+    background-size:220% 100%; }
+  .sign3d-floor{ position:absolute; left:6%; right:6%; bottom:2px; height:34%; pointer-events:none;
+    background:radial-gradient(ellipse at center, rgba(14,138,138,.22), transparent 72%); filter:blur(5px); }
+  .sign3d-hint{ position:absolute; right:10px; bottom:6px; font-family:var(--mono); font-size:10px; color:var(--text-soft); opacity:.65; pointer-events:none; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -478,6 +502,93 @@ ym(112732067,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webv
       <img src="works/shinomontazh.jpg" alt="Световая вывеска «Шиномонтаж», жёлтая подсветка" loading="lazy">
       <figcaption>Шиномонтаж<span>Световая вывеска</span></figcaption>
     </figure>
+  </div>
+</section>
+
+<section class="lp lp-sec lp-reveal" id="sign3d" aria-labelledby="sign3d-h">
+  <h2 class="lp-sec-h" id="sign3d-h">Витрина в объёме</h2>
+  <p class="lp-sec-sub">Переключите на «3D» и покрутите вывеску пальцем или мышкой</p>
+  <div class="sign3d-grid">
+    <div class="sign3d-card">
+      <div class="sign3d-card-head"><span class="sign3d-name">Табак</span>
+        <div class="sign3d-tabs"><button class="sign3d-tab active" data-mode="photo">Фото</button><button class="sign3d-tab" data-mode="3d">3D</button></div></div>
+      <div class="sign3d-view">
+        <img class="sign3d-photo active" src="works/tabak.jpg" alt="Вывеска «Табак»" loading="lazy">
+        <div class="sign3d-stage" data-word="ТАБАК" data-front="#ffffff" data-outline="#111111"><div class="sign3d-word"></div><div class="sign3d-hint">тяни →</div></div>
+      </div>
+    </div>
+    <div class="sign3d-card">
+      <div class="sign3d-card-head"><span class="sign3d-name">Аптека</span>
+        <div class="sign3d-tabs"><button class="sign3d-tab active" data-mode="photo">Фото</button><button class="sign3d-tab" data-mode="3d">3D</button></div></div>
+      <div class="sign3d-view">
+        <img class="sign3d-photo active" src="works/apteka.jpg" alt="Вывеска «Аптека»" loading="lazy">
+        <div class="sign3d-stage" data-word="АПТЕКА" data-front="#39d353" data-outline="#ffffff"><div class="sign3d-word"></div><div class="sign3d-hint">тяни →</div></div>
+      </div>
+    </div>
+    <div class="sign3d-card">
+      <div class="sign3d-card-head"><span class="sign3d-name">Ремонт телефонов</span>
+        <div class="sign3d-tabs"><button class="sign3d-tab active" data-mode="photo">Фото</button><button class="sign3d-tab" data-mode="3d">3D</button></div></div>
+      <div class="sign3d-view">
+        <img class="sign3d-photo active" src="works/remont-telefonov.jpg" alt="Вывеска «Ремонт телефонов»" loading="lazy">
+        <div class="sign3d-stage" data-word="РЕМОНТ" data-front="#ffffff" data-outline="#111111"><div class="sign3d-word"></div><div class="sign3d-hint">тяни →</div></div>
+      </div>
+    </div>
+    <div class="sign3d-card">
+      <div class="sign3d-card-head"><span class="sign3d-name">Маникюр</span>
+        <div class="sign3d-tabs"><button class="sign3d-tab active" data-mode="photo">Фото</button><button class="sign3d-tab" data-mode="3d">3D</button></div></div>
+      <div class="sign3d-view">
+        <img class="sign3d-photo active" src="works/manikur.jpg" alt="Вывеска «Маникюр»" loading="lazy">
+        <div class="sign3d-stage" data-word="МАНИКЮР" data-front="#ff4fd8" data-outline="#ffffff"><div class="sign3d-word"></div><div class="sign3d-hint">тяни →</div></div>
+      </div>
+    </div>
+    <div class="sign3d-card">
+      <div class="sign3d-card-head"><span class="sign3d-name">Детейлинг</span>
+        <div class="sign3d-tabs"><button class="sign3d-tab active" data-mode="photo">Фото</button><button class="sign3d-tab" data-mode="3d">3D</button></div></div>
+      <div class="sign3d-view">
+        <img class="sign3d-photo active" src="works/detailing.jpg" alt="Вывеска «Детейлинг»" loading="lazy">
+        <div class="sign3d-stage" data-word="ДЕТЕЙЛИНГ" data-front="#f5e642" data-outline="#ffffff"><div class="sign3d-word"></div><div class="sign3d-hint">тяни →</div></div>
+      </div>
+    </div>
+    <div class="sign3d-card">
+      <div class="sign3d-card-head"><span class="sign3d-name">Сантехника</span>
+        <div class="sign3d-tabs"><button class="sign3d-tab active" data-mode="photo">Фото</button><button class="sign3d-tab" data-mode="3d">3D</button></div></div>
+      <div class="sign3d-view">
+        <img class="sign3d-photo active" src="works/santehnika.jpg" alt="Вывеска «Сантехника»" loading="lazy">
+        <div class="sign3d-stage" data-word="САНТЕХНИКА" data-front="#ffffff" data-outline="#cfd4d8"><div class="sign3d-word"></div><div class="sign3d-hint">тяни →</div></div>
+      </div>
+    </div>
+    <div class="sign3d-card">
+      <div class="sign3d-card-head"><span class="sign3d-name">Минимаркет</span>
+        <div class="sign3d-tabs"><button class="sign3d-tab active" data-mode="photo">Фото</button><button class="sign3d-tab" data-mode="3d">3D</button></div></div>
+      <div class="sign3d-view">
+        <img class="sign3d-photo active" src="works/minimarket.jpg" alt="Вывеска «Минимаркет»" loading="lazy">
+        <div class="sign3d-stage" data-word="МИНИМАРКЕТ" data-front="#ff5a4e" data-outline="#ffffff"><div class="sign3d-word"></div><div class="sign3d-hint">тяни →</div></div>
+      </div>
+    </div>
+    <div class="sign3d-card">
+      <div class="sign3d-card-head"><span class="sign3d-name">Груминг</span>
+        <div class="sign3d-tabs"><button class="sign3d-tab active" data-mode="photo">Фото</button><button class="sign3d-tab" data-mode="3d">3D</button></div></div>
+      <div class="sign3d-view">
+        <img class="sign3d-photo active" src="works/grooming.jpg" alt="Вывеска «Груминг»" loading="lazy">
+        <div class="sign3d-stage" data-word="ГРУМИНГ" data-front="#ffffff" data-outline="#dddddd"><div class="sign3d-word"></div><div class="sign3d-hint">тяни →</div></div>
+      </div>
+    </div>
+    <div class="sign3d-card">
+      <div class="sign3d-card-head"><span class="sign3d-name">Пекарня</span>
+        <div class="sign3d-tabs"><button class="sign3d-tab active" data-mode="photo">Фото</button><button class="sign3d-tab" data-mode="3d">3D</button></div></div>
+      <div class="sign3d-view">
+        <img class="sign3d-photo active" src="works/pekarnya.jpg" alt="Вывеска «Пекарня»" loading="lazy">
+        <div class="sign3d-stage" data-word="ПЕКАРНЯ" data-front="#f5e642" data-outline="#111111"><div class="sign3d-word"></div><div class="sign3d-hint">тяни →</div></div>
+      </div>
+    </div>
+    <div class="sign3d-card">
+      <div class="sign3d-card-head"><span class="sign3d-name">Косметолог</span>
+        <div class="sign3d-tabs"><button class="sign3d-tab active" data-mode="photo">Фото</button><button class="sign3d-tab" data-mode="3d">3D</button></div></div>
+      <div class="sign3d-view">
+        <img class="sign3d-photo active" src="works/kosmetolog.jpg" alt="Вывеска «Косметолог»" loading="lazy">
+        <div class="sign3d-stage" data-word="КОСМЕТОЛОГ" data-front="#2fb6e0" data-outline="#ffffff"><div class="sign3d-word"></div><div class="sign3d-hint">тяни →</div></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1381,6 +1492,66 @@ window.scrollTo(0, 0);
     }, { threshold: 0 });
     io2.observe(calc);
   }
+})();
+</script>
+<script>
+(function(){
+  function mix(hex, hex2, t){
+    function p(h){ h=h.replace("#",""); if(h.length===3){ h=h.split("").map(function(c){return c+c;}).join(""); } return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)]; }
+    var a=p(hex), b=p(hex2);
+    var r=Math.round(a[0]+(b[0]-a[0])*t), g=Math.round(a[1]+(b[1]-a[1])*t), bl=Math.round(a[2]+(b[2]-a[2])*t);
+    return "rgb("+r+","+g+","+bl+")";
+  }
+  function initSign3d(stage){
+    var word = stage.querySelector(".sign3d-word");
+    var text = stage.getAttribute("data-word") || "";
+    var front = stage.getAttribute("data-front") || "#ffffff";
+    var outline = stage.getAttribute("data-outline") || "#111111";
+    var depth = 22;
+    for (var i = depth; i >= 0; i--) {
+      var l = document.createElement("div");
+      l.className = "sign3d-layer";
+      l.textContent = text;
+      if (i === 0) { l.style.color = front; l.style.webkitTextStroke = "1.5px " + outline; }
+      else { var t = i / depth; l.style.color = mix(front, "#06282c", 0.35 + t * 0.55); }
+      l.style.transform = "translate(-50%,-50%) translateZ(" + (-i * 1.6) + "px)";
+      word.appendChild(l);
+    }
+    var sweep = document.createElement("div"); sweep.className = "sign3d-sweep"; stage.appendChild(sweep);
+    var floor = document.createElement("div"); floor.className = "sign3d-floor"; stage.appendChild(floor);
+    var rx = -8, ry = 16, dragging = false, auto = true, lastX = 0, lastY = 0;
+    var frontLayer = word.querySelector(".sign3d-layer");
+    var naturalW = frontLayer.offsetWidth, naturalH = frontLayer.offsetHeight;
+    var availW = stage.clientWidth * 0.86, availH = stage.clientHeight * 0.58;
+    var scale = Math.min(availW / naturalW, availH / naturalH, 1.5);
+    if (!isFinite(scale) || scale <= 0) scale = 1;
+    scale = Math.max(scale, 0.35);
+    function apply(){ word.style.transform = "scale(" + scale + ") rotateX(" + rx + "deg) rotateY(" + ry + "deg)"; sweep.style.backgroundPosition = (ry * 2) + "px 0"; }
+    apply();
+    stage.addEventListener("pointerdown", function(e){ e.preventDefault(); try{ stage.setPointerCapture(e.pointerId); }catch(err){} dragging = true; auto = false; lastX = e.clientX; lastY = e.clientY; });
+    stage.addEventListener("pointermove", function(e){ if(!dragging) return; ry += (e.clientX - lastX) * 0.4; rx -= (e.clientY - lastY) * 0.4; rx = Math.max(-55, Math.min(55, rx)); lastX = e.clientX; lastY = e.clientY; apply(); });
+    stage.addEventListener("pointerup", function(){ dragging = false; });
+    stage.addEventListener("pointercancel", function(){ dragging = false; });
+    stage.addEventListener("dragstart", function(e){ e.preventDefault(); });
+    stage.addEventListener("selectstart", function(e){ e.preventDefault(); });
+    setInterval(function(){ if (!dragging && auto) { ry += 0.12; apply(); } }, 30);
+  }
+  document.querySelectorAll(".sign3d-card").forEach(function(card){
+    var tabs = card.querySelectorAll(".sign3d-tab");
+    var photo = card.querySelector(".sign3d-photo");
+    var stage = card.querySelector(".sign3d-stage");
+    var inited = false;
+    tabs.forEach(function(btn){
+      btn.addEventListener("click", function(){
+        tabs.forEach(function(b){ b.classList.remove("active"); });
+        btn.classList.add("active");
+        var mode = btn.getAttribute("data-mode");
+        photo.classList.toggle("active", mode === "photo");
+        stage.classList.toggle("active", mode === "3d");
+        if (mode === "3d" && !inited) { inited = true; initSign3d(stage); }
+      });
+    });
+  });
 })();
 </script>
 <script>
